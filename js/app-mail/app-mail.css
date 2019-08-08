@@ -1,0 +1,153 @@
+tr.new-email{
+	font-weight: bold;
+}
+
+.new-email .mobile-mail-from,
+.new-email .mobile-mail-subject
+{
+	font-weight: bold;
+}
+
+.email-heading-bar{
+	margin-bottom: 2px;
+}
+
+.email-heading-bar .email-date{
+	text-align: right
+}
+
+.email-bar.active .email-heading-bar .email-heading{
+	cursor: pointer;
+}
+
+.email-heading-bar .email-heading .email-from-name{	
+	font-weight: bold;
+}
+
+.email-heading-bar .email-heading .email-from-email{
+ 	font-size: 90%;
+ 	color: gray;
+}
+
+.email-time-ago{
+	font-size: 90%;
+ 	color: gray;
+}
+
+.email-bar{
+	border-bottom: 1px solid #efefef;
+	padding-bottom: 15px;
+	margin-bottom: 15px;	
+}
+
+.email-body-iframe{
+	width: 100%;
+	height: 30px;
+	border: 0px;	
+}
+
+.email-body{
+	
+}
+
+.email-attachments-heading{
+	padding-top: 5px;
+}
+
+.email-bar.closed .email-body{
+	height: 0px;
+	overflow:hidden;		
+}
+
+.email-bar.open .email-body-short{
+	display:none;
+}
+
+.mail-listing .count-mails{
+	font-weight:normal;
+	color: gray;
+	font-size: 90%;
+}
+
+.mail-listing .body-short{
+	font-weight:normal;
+	color: gray;
+	font-size: 90%;
+}
+
+.mail-listing tr{
+	cursor: pointer;
+}
+
+.list-inline.mail-filters {
+	margin-bottom: 0px;
+}
+
+.list-inline.mail-filters li{
+	vertical-align: top;
+	padding-bottom: 5px;
+	padding-left: 0px;
+	
+}
+
+.mail-star{
+	color: #cdcfcf;
+	font-size: 16px;
+}
+
+.mail-star-active{
+	color: #f09300;
+}
+
+.email-tools{
+	text-align: right;
+	font-size: 16px;
+}
+
+.email-to-info{
+	color: gray;
+	font-size: 90%;
+}
+
+.email-to-bar{
+	margin-top: 2px;
+	margin-bottom: 5px;
+}
+
+.email-tools .fa{
+	cursor: pointer;
+	margin-left: 5px;
+}
+
+.email-explan-area{	
+	cursor: pointer;
+	height: 45px;
+	margin-top: 30px;
+}
+
+.email-explan-area-count{
+	width: 32px;
+	height: 32px;
+	box-shadow: inset 0 0 0 1px #dcdada;
+    background-color: #fff;
+    color: #5f6368;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 2.2;   
+    position: absolute;
+    margin-top: -10px; 
+    margin-left: 15px;  
+          
+}
+
+.email-explan-area-border{
+	border-top: 1px solid #dcdada;
+	border-bottom: 1px solid #dcdada;
+	height: 10px;
+	margin-top: 20px;
+}
+
+.mobile-mail-from{
+	font-size: 16px;
+}

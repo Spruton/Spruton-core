@@ -1,0 +1,132 @@
+@import url(ui.css);
+@import url(item.css);
+@import url(shape.css);
+@import url(menu.css);
+
+* {
+	font-family: source sans pro, sans-serif;
+}
+
+html, body {
+	margin: 0;
+	overflow: hidden;
+	height: 100%;
+	background-color: #f5f6f8;
+	-webkit-user-select: none; /* no magnifier on hold */
+}
+
+[contenteditable] { /* allow for editable items */
+	-webkit-user-select: auto;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+#port {
+	overflow: hidden;
+	font-size: 13px;
+}
+
+#throbber {
+	position: absolute;
+	top: 50px;
+	left: -60px;
+	width: 50px;
+	height: 50px;
+	background-image: url(throbber.gif);
+}
+
+#throbber:not(.visible) {
+	opacity: 0;
+}
+
+.ghost {
+	position: absolute !important; /* to prevent collision with .content */
+	opacity: 0.5;
+	z-index: 1;
+}
+
+#tip {
+	position: fixed;
+	z-index: 1;
+	left: 10px;
+	bottom: 5px;
+	transition: all 500ms;
+}
+
+#tip:before {
+	
+}
+
+#tip.hidden {
+	opacity: 0;
+}
+
+
+.btn {
+    display: inline-block;
+    padding: 4px 6px;
+    margin-bottom: 0;
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.428571429;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+     -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+    -webkit-text-shadow: none;
+    -moz-text-shadow: none;
+    text-shadow: none;
+    outline: none !important;
+    margin-top: 5px;
+}
+
+.btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default {
+    color: #333;
+    background-color: #ebebeb;
+    border-color: #adadad;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #428bca;
+    border-color: #357ebd;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open .dropdown-toggle.btn-primary {
+    color: #fff;
+    background-color: #3276b1;
+    border-color: #285e8e;
+}
+
+.icons{
+	margin: 0;
+	padding-left: 15px;
+	margin-top:-10px;
+}
+
+.icons li{
+	display: inline;
+	margin: 3px 5px 3px 0;
+	cursor: pointer;
+}
