@@ -1,4 +1,4 @@
-# Spruton-core
+# Spruton
 Open-source web based Business Management Software for companies of all sizes.
 
 # Getting started with Spruton
