@@ -178,9 +178,14 @@ switch($app_module_action)
 		$copy_values = [];
 		foreach(preg_split('/\r\n|\r|\n/',$cfg->get('copy_values')) as $values)
 		{
+			if(!strstr($values,'=')) continue;
+			
 			$values = explode('=',str_replace(array(' ','[',']'),'',$values));
 									
-			$copy_values[] = ['from'=>(int)$values[0],'to'=>(int)$values[1]];
+			$copy_values[] = [
+					'from'=>(in_array($values[0],['id','date_added','created_by']) ? $values[0] : (int)$values[0]),
+					'to'=>(int)$values[1]					
+			];
 		}
 		
 		$item_id = _post::int('item_id');
@@ -191,8 +196,60 @@ switch($app_module_action)
 		if($item = db_fetch_array($item_query))
 		{
 			foreach($copy_values as $value)
-			{	
-				$js .= '$("#fields_' . $value['to'] . '").val("' . addslashes($item['field_' . $value['from']]). '");' . "\n";
+			{				
+								
+				if(in_array($value['from'],['id','date_added','created_by']))
+				{	
+					$item_value = $item[$value['from']];
+				}
+				else
+				{
+					if(!isset($item['field_' . $value['from']])) continue;
+					
+					$item_value = $item['field_' . $value['from']];
+				}
+				
+				switch($app_fields_cache[$field['entities_id']][$value['to']]['type'])
+				{
+					case 'fieldtype_input_date':
+						$item_value = ($item_value>0 ? date('Y-m-d',$item_value) : '');
+						break;
+					case 'fieldtype_input_datetime':
+						$item_value = ($item_value>0 ? date('Y-m-d H:i',$item_value) : '');
+						break;
+				}
+				
+				switch($app_fields_cache[$field['entities_id']][$value['to']]['type'])
+				{
+					case 'fieldtype_users':
+					case 'fieldtype_entity':
+					case 'fieldtype_dropdown_multiple':
+						$js .= '$("#fields_' . $value['to'] . '").val("' . addslashes($item_value). '".split(",")).trigger("chosen:updated");' . "\n";
+						break;
+					case 'fieldtype_tags':
+						$js .= '$("#fields_' . $value['to'] . '").val("' . addslashes($item_value). '".split(",")).trigger("change");' . "\n";
+						break;
+					case 'fieldtype_checkboxes':
+						$js .= '
+								
+								$(".field_' . $value['to'] . '").each(function(){      
+							    $(this).attr("checked",false)
+							    $("#uniform-"+$(this).attr("id")+" span").removeClass("checked")
+										
+									if($.inArray($(this).val(),"' . addslashes($item_value). '".split(","))!=-1)
+									{
+										$(this).attr("checked",true)
+							    	$("#uniform-"+$(this).attr("id")+" span").addClass("checked")
+									}
+							  })								
+								' . "\n";
+						break;
+					default:
+						$js .= '$("#fields_' . $value['to'] . '").val("' . addslashes($item_value). '").trigger("chosen:updated");' . "\n";
+						break;
+				}
+				
+				
 			}		
 		}
 		

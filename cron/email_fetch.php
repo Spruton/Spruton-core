@@ -25,7 +25,13 @@ if(is_file($v = 'plugins/ext/languages/' . CFG_APP_LANGUAGE))
 	require($v);
 }
 
-$app_user = array('id'=>0,'group_id'=>0,'language'=>CFG_APP_LANGUAGE);
+$app_user = array(
+		'id'=>0,
+		'group_id'=>0,
+		'language'=>CFG_APP_LANGUAGE,
+		'name' => CFG_EMAIL_NAME_FROM,
+		'email' => CFG_EMAIL_ADDRESS_FROM, 
+);
 
 $mail = new mail_fetcher();
 $mail->fetch();

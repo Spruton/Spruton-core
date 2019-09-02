@@ -706,9 +706,7 @@ textarea.editor{
 }
 
 .fieldtype-image-filename{
-  padding: 5px;
-  margin-top: 1px;
-  border-top: 1px solid #ddd;
+  padding: 5px;  
   overflow:hidden;
   white-space: nowrap;
 }
@@ -2026,7 +2024,7 @@ th .tooltip{
 [class*=" la-"] {
   display: inline-block;
   margin-top: 1px;
-  font-size: 18px;
+  font-size: 17px;
   *margin-right: .3em;
   line-height: 12px;
   
@@ -2194,6 +2192,15 @@ th .tooltip{
 	overflow:hidden;
 	overflow-y: auto;
 	max-height: 50px;	
+}
+
+@media (max-width: 991px){
+	#rc-imageselect, .g-recaptcha {
+		transform:scale(0.73);
+		-webkit-transform:scale(0.73);
+		transform-origin:0 0;
+		-webkit-transform-origin:0 0;
+	}
 }
 
 

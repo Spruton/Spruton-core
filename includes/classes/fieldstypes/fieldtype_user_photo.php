@@ -86,8 +86,12 @@ class fieldtype_user_photo
       $file = attachments::parse_filename($options['value']);
       
       $filename = $file['file'];
-            
+      
       if(isset($options['is_export']))
+      {
+      	return '<img width=120 height=120 src=' . DIR_WS_USERS . $file['file_sha1'] . '>';
+      }
+      elseif(isset($options['is_export']))
       {
         return $file['name'];    
       }

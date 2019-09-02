@@ -248,6 +248,12 @@ class fieldtype_user_roles
     
     $value = (is_array($options['value']) ? implode(',',$options['value']) : $options['value']);
     
+    //reset role if no users selected
+    if(!strlen($value))
+    {    	    	
+    	db_query("delete from app_user_roles_to_items where fields_id='" . $options['field']['id'] . "' and  entities_id='" . $options['field']['entities_id'] . "' and items_id='" . $options['item']['id'] . "'");
+    }
+    
     //check if value changed
     if($cfg->get('disable_notification')!=1)
     {

@@ -4,22 +4,36 @@ class reports
 {
 	public static function copy($reports_id)
 	{
-		$reports_query = db_query("select * from app_reports where id='" . $reports_id . "'");
-		if($reports = db_fetch_array($reports_query))
+		$reports_list[] = $reports_id;
+		$reports_list = reports::get_parent_reports($reports_id,$reports_list);
+		
+		$reports_list = array_reverse($reports_list);
+		
+		//print_rr($reports_list);
+		//exit();
+		
+		$parent_reports_id = 0;
+		
+		foreach($reports_list as $reports_id)
 		{
-			unset($reports['id']);			
-			$reports['name'] = $reports['name'] . ' (' . TEXT_EXT_NAME_COPY . ')';
-			
-			db_perform('app_reports', $reports);
-			$new_reports_id = db_insert_id();
-			
-			$filters_query = db_query("select * from app_reports_filters where reports_id='" . $reports_id . "'");
-			while($filters = db_fetch_array($filters_query))
+			$reports_query = db_query("select * from app_reports where id='" . $reports_id . "'");
+			if($reports = db_fetch_array($reports_query))
 			{
-				unset($filters['id']);
-				$filters['reports_id'] = $new_reports_id; 
+				unset($reports['id']);			
+				$reports['name'] = $reports['name'] . ' (' . TEXT_EXT_NAME_COPY . ')';
+				$reports['parent_id'] = $parent_reports_id;
 				
-				db_perform('app_reports_filters', $filters);
+				db_perform('app_reports', $reports);
+				$new_reports_id = $parent_reports_id = db_insert_id();
+				
+				$filters_query = db_query("select * from app_reports_filters where reports_id='" . $reports_id . "'");
+				while($filters = db_fetch_array($filters_query))
+				{
+					unset($filters['id']);
+					$filters['reports_id'] = $new_reports_id; 
+					
+					db_perform('app_reports_filters', $filters);
+				}
 			}
 		}
 		
@@ -205,7 +219,7 @@ class reports
   
   public static function add_filters_query($reports_id,$listing_sql_query, $prefix = '', $is_parent_report = false)
   {	
-  	global $sql_query_having;
+  	global $sql_query_having, $app_entities_cache;
   	
     $reports_info_query = db_query("select * from app_reports where id='" . db_input($reports_id). "'");
     if($reports_info = db_fetch_array($reports_info_query))
@@ -278,27 +292,36 @@ class reports
       {
       	$listing_sql_query  .= reports::prepare_filters_having_query($sql_query_having[$reports_info['entities_id']]);
       }
-      
+                        
       //add filters for parent report if exist
       if($reports_info['parent_id']>0)
-      {
-        $report_info = db_find('app_reports',$reports_info['parent_id']);
-               
-        /**
-         * The sql query "(select item_id from (select e.id ..." need to prepare filters by formula fileds with using having
-         */
-        $check_query = db_query("select count(*) as total from app_fields where entities_id='" . db_input($report_info['entities_id']) . "' and type='fieldtype_formula'");
-        $check = db_fetch_array($check_query);
+      {      	      	
+      	$report_info_query = db_query("select entities_id from app_reports where id='" . db_input($reports_info['parent_id']) . "'");
+      	if($report_info = db_fetch_array($report_info_query))
+      	{              		
+	        /**
+	         * The sql query "(select item_id from (select e.id ..." need to prepare filters by formula fileds with using having
+	         */
+	        $check_query = db_query("select count(*) as total from app_fields where entities_id='" . db_input($report_info['entities_id']) . "' and type='fieldtype_formula'");
+	        $check = db_fetch_array($check_query);
+	        
+	        if($check['total']>0)
+	        {
+	        	$listing_sql_query .= ' and e.parent_item_id in (select item_id from (select e.id as item_id ' . fieldtype_formula::prepare_query_select($report_info['entities_id'],'') . ' from app_entity_' . $report_info['entities_id']. ' e where e.id>0 ' .  items::add_access_query($report_info['entities_id'],'') . ' ' . reports::add_filters_query($reports_info['parent_id'],'','',true)  . ') as parent_entity_' . $report_info['entities_id'] . ' )';
+	        }
+	        else
+	        {
+	        	$listing_sql_query .= ' and e.parent_item_id in (select e.id from app_entity_' . $report_info['entities_id']. ' e where e.id>0  ' .  items::add_access_query($report_info['entities_id'],'') . ' ' . reports::add_filters_query($reports_info['parent_id'],'')  . ')';        	
+	        }
+      	}
         
-        if($check['total']>0)
-        {
-        	$listing_sql_query .= ' and e.parent_item_id in (select item_id from (select e.id as item_id ' . fieldtype_formula::prepare_query_select($report_info['entities_id'],'') . ' from app_entity_' . $report_info['entities_id']. ' e where e.id>0 ' .  items::add_access_query($report_info['entities_id'],'') . ' ' . reports::add_filters_query($reports_info['parent_id'],'','',true)  . ') as parent_entity_' . $report_info['entities_id'] . ' )';
-        }
-        else
-        {
-        	$listing_sql_query .= ' and e.parent_item_id in (select e.id from app_entity_' . $report_info['entities_id']. ' e where e.id>0 ' .  items::add_access_query($report_info['entities_id'],'') . ' ' . reports::add_filters_query($reports_info['parent_id'],'')  . ')';        	
-        }
-      }                   
+        
+      }      
+      elseif($app_entities_cache[$reports_info['entities_id']]['parent_id']>0 and $reports_info['reports_type']=='default') //check access for report type 'default' where parent_id=0
+      {            	              
+      	$listing_sql_query .= items::add_access_query_for_parent_entities($reports_info['entities_id']);                               
+      }
+      	
     }
                            
     return $listing_sql_query;
@@ -558,7 +581,7 @@ class reports
         }
         elseif(in_array($field_info['type'],array('fieldtype_parent_item_id')))
         {
-          $entity_info = db_find('app_entities',$field_info['entities_id']);
+          $entity_info = db_find('app_entities',$field_info['entities_id']);          
           if($entity_info['parent_id']>0)
           {
             if($heading_id = fields::get_heading_id($entity_info['parent_id']))
@@ -568,7 +591,7 @@ class reports
             }
             else
             {
-              $listing_order_fields[] = 'e.parent_item_id' . $order_cause;
+              $listing_order_fields[] = 'e.parent_item_id ' . $order_cause;
             }
           } 
         }
@@ -628,21 +651,13 @@ class reports
     {
       case 'filter_by_days':
           if(strlen($values[0])>0)
-          {
-            if(strstr($values[0],'-'))
-            {
-              $use_function = 'DATE_SUB';
-            }
-            else
-            {
-              $use_function = 'DATE_ADD';  
-            }
-            
-            $values[0] = str_replace(array('+','-'),'',$values[0]);
-            
+          {                        
             $sql_or = array();
             foreach(explode('&',$values[0]) as $v)
-            {         
+            {            	
+            	$use_function = (strstr($v[0],'-') ? 'DATE_SUB':'DATE_ADD');            	            
+            	$v = str_replace(array('+','-'),'',$v);
+            	
               $sql_or[] = "FROM_UNIXTIME(" . $field_name . ",'%Y-%m-%d')=date_format(" . $use_function . "(now(),INTERVAL " . (int)$v . " DAY),'%Y-%m-%d')";                
             }
             
@@ -684,18 +699,7 @@ class reports
       case 'filter_by_week':
       
             $values = strlen($values[0])>0 ? $values[0] : 0;
-
-            if(strstr($values,'-'))
-            {
-              $use_function = 'DATE_SUB';
-            }
-            else
-            {
-              $use_function = 'DATE_ADD';  
-            }
-            
-            $values = str_replace(array('+','-'),'',$values);
-            
+                        
             switch(CFG_APP_FIRST_DAY_OF_WEEK)
             {
               case '0':
@@ -708,7 +712,10 @@ class reports
             
             $sql_or = array();
             foreach(explode('&',$values) as $v)
-            {                       
+            {      
+            	$use_function = (strstr($v[0],'-') ? 'DATE_SUB':'DATE_ADD');
+            	$v = str_replace(array('+','-'),'',$v);
+            	
               $sql_or[] = "FROM_UNIXTIME(" . $field_name . ",'" . $myslq_date_format. "')=date_format(" . $use_function. "(now(),INTERVAL " . (int)$v . " WEEK),'" . $myslq_date_format . "')";                                
             }
             
@@ -718,21 +725,13 @@ class reports
       case 'filter_by_month':
       
             $values = strlen($values[0])>0 ? $values[0] : 0;
-
-            if(strstr($values,'-'))
-            {
-              $use_function = 'DATE_SUB';
-            }
-            else
-            {
-              $use_function = 'DATE_ADD';  
-            }
-            
-            $values = str_replace(array('+','-'),'',$values);
-            
+                        
             $sql_or = array();
             foreach(explode('&',$values) as $v)
-            {                       
+            {  
+            	$use_function = (strstr($v[0],'-') ? 'DATE_SUB':'DATE_ADD');
+            	$v = str_replace(array('+','-'),'',$v);
+            	
               $sql_or[] = "FROM_UNIXTIME(" . $field_name . ",'%Y-%m')=date_format(" . $use_function. "(now(),INTERVAL " . (int)$v . " MONTH),'%Y-%m')";                                
             }
             
@@ -741,21 +740,13 @@ class reports
         break;
       case 'filter_by_year':
             $values = strlen($values[0])>0 ? $values[0] : 0;
-
-            if(strstr($values,'-'))
-            {
-              $use_function = 'DATE_SUB';
-            }
-            else
-            {
-              $use_function = 'DATE_ADD';  
-            }
-            
-            $values = str_replace(array('+','-'),'',$values);
-            
+                        
             $sql_or = array();
             foreach(explode('&',$values) as $v)
-            {                       
+            {    
+            	$use_function = (strstr($v[0],'-') ? 'DATE_SUB':'DATE_ADD');
+            	$v = str_replace(array('+','-'),'',$v);
+            	
               $sql_or[] = "FROM_UNIXTIME(" . $field_name . ",'%Y')=date_format(" . $use_function. "(now(),INTERVAL " . (int)$v . " YEAR),'%Y')";                                
             }
             

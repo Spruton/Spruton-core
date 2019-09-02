@@ -88,8 +88,12 @@ class fieldtype_image
     if(strlen($options['value'])>0)
     {  
       $file = attachments::parse_filename($options['value']);
-                            
-      if(isset($options['is_export']))
+            
+      if(isset($options['is_print']))
+      {
+      	return '<img width=120 height=120 src=' . url_for('items/info&path=' . $options['field']['entities_id']  ,'&action=download_attachment&preview=1&file=' . urlencode(base64_encode($options['value']))) . '>';
+      }
+      elseif(isset($options['is_export']))
       {
         return $file['name'];    
       }
@@ -107,12 +111,17 @@ class fieldtype_image
           
           $html = '
           <div class="fieldtype-image-container" style="width: ' . $width . 'px; max-height: ' . $width . 'px;">' . 
-            link_to($img,url_for('items/info&path=' . $options['path'] ,'&action=preview_attachment_image&file=' . urlencode(base64_encode($options['value']))),array('class'=>$fancybox_css_class)) .  
-            (!isset($options['is_listing']) ? '<div class="fieldtype-image-filename" style="width: ' . $width . 'px">
-              ' . link_to('<i class="fa fa-download"></i> ' . $file['name'],url_for('items/info','path=' . $options['path'] . '&action=download_attachment&file=' . urlencode(base64_encode($options['value'])))) . '            
-            </div>' : '') . '
+            link_to($img,url_for('items/info&path=' . $options['path'] ,'&action=preview_attachment_image&file=' . urlencode(base64_encode($options['value']))),array('class'=>$fancybox_css_class)) . '
            </div> 
           '; 
+          
+          if(!isset($options['is_listing']))
+          {
+          	$html .= '
+          	<div class="fieldtype-image-filename" style="width: ' . $width . 'px">
+              ' . link_to('<i class="fa fa-download"></i> ' . $file['name'],url_for('items/info','path=' . $options['path'] . '&action=download_attachment&file=' . urlencode(base64_encode($options['value'])))) . '
+            </div>';
+          }
           
           $html .='
           <script>

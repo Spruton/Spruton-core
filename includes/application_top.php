@@ -1,5 +1,5 @@
 <?php
-  define('PROJECT_VERSION','2.5.1');
+  define('PROJECT_VERSION','2.5.2');
   define('PROJECT_VERSION_DEV','');
   
 //check if installed

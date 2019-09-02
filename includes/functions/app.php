@@ -1029,13 +1029,24 @@ function app_render_fields_popup_html($fields_in_popup, $reports_info = array())
 		return '';				
 	}
 	
+	//print_r($fields_in_popup);
+	
   $popup_html = '<table class=popover-table-data>';
   foreach($fields_in_popup as $fields)
   {
+  	if(in_array($fields['type'],['fieldtype_image','fieldtype_user_photo']))
+  	{
+  		$value = $fields['value'];
+  	}
+  	else
+  	{
+  		$value = htmlspecialchars(strip_tags($fields['value']));
+  	}
+  	 
     $popup_html .= '
       <tr>
-        <td>' . htmlspecialchars(strip_tags($fields['name'])) . '</td>
-        <td>' . htmlspecialchars(strip_tags($fields['value'])) . '</td>
+        <td valign=top>' . htmlspecialchars(strip_tags($fields['name'])) . '</td>
+        <td valign=top>' . $value . '</td>
       </tr>
     ';
   }

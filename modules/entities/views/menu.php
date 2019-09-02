@@ -23,7 +23,7 @@
   <tr>
     <td style="white-space: nowrap;"><?php echo button_icon_delete(url_for('entities/menu_delete','id=' . $v['id'])) . ' ' . button_icon_edit(url_for('entities/menu_form','id=' . $v['id'])) ?></td>    
     <td><?php 
-    	echo '<i class="fa ' . (strlen($v['icon'])>0 ? $v['icon']:'fa-list-alt'). '" aria-hidden="true"></i> <b>' . $v['name'] . '</b>';
+    	echo app_render_icon(strlen($v['icon'])>0 ? $v['icon']:'fa-list-alt') . ' <b>' . $v['name'] . '</b>';
 			
 			if(strlen($v['entities_list'])>0)
 			{

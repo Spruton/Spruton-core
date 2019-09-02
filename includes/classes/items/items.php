@@ -280,7 +280,8 @@ class items
             {
               return fields_choices::render_value($heading_field_value,true);
             }
-          break;                             
+          break;                
+        case 'fieldtype_entity_ajax':
         case 'fieldtype_entity':
             $cfg = fields_types::parse_configuration($field_info['configuration']);
             

@@ -48,13 +48,15 @@ class fieldtype_related_records
     		'type'=>'dropdown',
     		'choices'=>['count'=>TEXT_COUNT_RELATED_ITEMS,'list'=>TEXT_LIST_RELATED_ITEMS],
     		'params'=>array('class'=>'form-control input-medium'));
-            
+    
+    /*
     $cfg[TEXT_SETTINGS][] = array(
     		'title'=>tooltip_icon(TEXT_ENTER_TEXT_PATTERN_INFO) . TEXT_HEADING_PATTER_IN_LINSING,
     		'tooltip' => TEXT_HEADING_TEMPLATE_INFO,
     		'name'=>'heading_template',
     		'type'=>'textarea',
     		'params'=>array('class'=>'form-control input-xlare textarea-small'));
+    */
                    
     $cfg[TEXT_SETTINGS][] = array('name'=>'fields_in_listing','type'=>'hidden');
     $cfg[TEXT_SETTINGS][] = array('name'=>'fields_in_popup','type'=>'hidden');

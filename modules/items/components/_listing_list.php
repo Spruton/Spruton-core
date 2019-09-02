@@ -165,6 +165,7 @@ while($item = db_fetch_array($items_query))
 			$section_fields[] = [
 					'name' => fields_types::get_option($field['type'],'name',$field['name']), 
 					'value' => $value,
+					'type' => $field['type'],
 			];
 			
 		}
@@ -176,10 +177,12 @@ while($item = db_fetch_array($items_query))
 			
 			foreach($section_fields as $field)
 			{
+				$style = (in_array($field['type'],['fieldtype_textarea','fieldtype_textarea_wysiwyg']) ? 'style="white-space:normal"':'');
+				
 				$html .= '
 						<tr>
 							' . ($section['display_field_names'] ? '<th>' . $field['name'] . ': </th>' : '') . '
-							<td class="' . ($section['display_field_names'] ? 'with_th' : '') . '">' . $field['value'] . '</td>
+							<td ' . $style . ' class="' . ($section['display_field_names'] ? 'with_th' : '') . '">' . $field['value'] . '</td>
 						</tr>
 						';
 			}

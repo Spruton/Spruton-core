@@ -1,7 +1,7 @@
 <?php
   app_reset_selected_items();
    
-  $listing_container = 'entity_items_listing' . $reports_info['id'] . '_' . $reports_info['entities_id'];
+  $listing_container = 'entity_items_listing' . (isset($force_filters_reports_id) ? $force_filters_reports_id : $reports_info['id']) . '_' . $reports_info['entities_id'];
       
   //check if parent reports was not set
   if($entity_info['parent_id']>0 and $reports_info['parent_id']==0)
@@ -143,7 +143,7 @@ if(strlen($with_selected_menu))
     </div>
   </div>
   <div class="col-sm-2">
-  	<?php echo ($reports_info['reports_type']!='common' ? listing_types::render_switches($reports_info,$curren_listing_type):'') ?>
+  	<?php echo ($reports_info['reports_type']!='common' and !isset($force_filters_reports_id) ? listing_types::render_switches($reports_info,$curren_listing_type):'') ?>
   </div>
   <div class="col-sm-5">
     <div class="entitly-listing-buttons-right">    

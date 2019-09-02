@@ -26,6 +26,7 @@ class comments
 				'fieldtype_checkboxes',
 				'fieldtype_radioboxes',
 				'fieldtype_dropdown',
+				'fieldtype_dropdown_multiple',
 				'fieldtype_grouped_users',
 				'fieldtype_progress',
 				'fieldtype_textarea',				

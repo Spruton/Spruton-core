@@ -76,7 +76,7 @@ class fieldtype_autostatus
 	  				{
 	  					$app_changed_fields[] = array(
 	  							'name'=>$fields['name'],
-	  							'value'=>$app_choices_cache[$choices['id']],
+	  							'value'=>$app_choices_cache[$choices['id']]['name'],
 	  							'fields_id'=>$fields['id'],
 	  							'fields_value'=>$choices['id'],
 	  					);

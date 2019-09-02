@@ -38,8 +38,8 @@ if($reports_info['reports_type']=='entity_menu')
   	$default_reports_query = db_query("select * from app_reports where entities_id='" . db_input($reports_info['entities_id']). "' and reports_type='default'");
   	if(db_num_rows($default_reports_query))
   	{
-  		$reports_info = db_fetch_array($default_reports_query);
-  		$reports_info['reports_type'] = 'entity_menu';
+  		$default_reports_info = db_fetch_array($default_reports_query);
+  		$force_filters_reports_id = $default_reports_info['id'];
   	}
   }
 }

@@ -66,7 +66,7 @@ class fieldtype_users
   			foreach($path_array as $path_info)
   			{
   				$parent_users_fields = array();
-  				$parent_fields_query = db_query("select f.* from app_fields f where f.type in ('fieldtype_users') and  f.entities_id='" . db_input($path_info['entities_id']) . "'");
+  				$parent_fields_query = db_query("select f.* from app_fields f where f.type in ('fieldtype_users','fieldtype_user_roles','fieldtype_users_approve') and  f.entities_id='" . db_input($path_info['entities_id']) . "'");
   				while($parent_field = db_fetch_array($parent_fields_query))
   				{
   					$has_parent_users = true;

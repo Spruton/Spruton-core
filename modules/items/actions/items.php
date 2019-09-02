@@ -600,6 +600,12 @@ switch($app_module_action)
 $entity_info = db_find('app_entities',$current_entity_id);
 $entity_cfg = new entities_cfg($current_entity_id);
 
+//check if parent exist in path
+if($entity_info['parent_id']>0 and $parent_entity_item_id==0)
+{
+	redirect_to('dashboard/access_forbidden');
+}
+
 $entity_listing_heading = (strlen($entity_cfg->get('listing_heading'))>0 ? $entity_cfg->get('listing_heading') : $entity_info['name']);
 
 $app_title = app_set_title($entity_listing_heading);
@@ -609,15 +615,17 @@ if(!filters_panels::has_any($current_entity_id, $entity_cfg))
 {
 	//use default filters if there is no any filters panes stup
 	$default_reports_query = db_query("select * from app_reports where entities_id='" . db_input($current_entity_id). "' and reports_type='default'");
-	if(db_num_rows($default_reports_query))		
-		$reports_info = db_fetch_array($default_reports_query);
+	if(db_num_rows($default_reports_query))
+	{		
+		$default_reports_info = db_fetch_array($default_reports_query);
+		$force_filters_reports_id = $default_reports_info['id'];
+	}
 }
-else 
-{
-	//create default entity report for logged user
-	//also reports will be split by paretn item
-	$reports_info = reports::create_default_entity_report($current_entity_id, 'entity', $current_path_array);
-}
+
+//create default entity report for logged user
+//also reports will be split by paretn item
+$reports_info = reports::create_default_entity_report($current_entity_id, 'entity', $current_path_array);
+
 
  
 

@@ -367,11 +367,16 @@ class fields
                                 'item'=>$item,        												
                                 'is_listing'=>true,
                                 'is_export' => true,                                
+        												'is_print' => true,
                                 'redirect_to' => '',
                                 'reports_id'=> 0,
                                 'path'=> '');
                                 
-        $data[] = array('name'=> fields_types::get_option($field['type'],'name',$field['name']),'value'=>fields_types::output($output_options));
+        $data[] = array(
+        		'name'=> fields_types::get_option($field['type'],'name',$field['name']),
+        		'value'=>fields_types::output($output_options),
+        		'type'=>$field['type'],
+        );
       }
     }
     

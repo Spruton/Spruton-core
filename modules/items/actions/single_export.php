@@ -80,7 +80,7 @@ switch($app_module_action)
           }
           else 
           {          
-	          if(in_array($field['type'],array('fieldtype_textarea_wysiwyg','fieldtype_textarea','fieldtype_barcode','fieldtype_qrcode','fieldtype_todo_list','fieldtype_text_pattern','fieldtype_text_pattern_static')))
+	          if(in_array($field['type'],array('fieldtype_user_photo','fieldtype_image','fieldtype_textarea_wysiwyg','fieldtype_textarea','fieldtype_barcode','fieldtype_qrcode','fieldtype_todo_list','fieldtype_text_pattern','fieldtype_text_pattern_static')))
 	          {
 	            $output = trim(fields_types::output($output_options));
 	          }

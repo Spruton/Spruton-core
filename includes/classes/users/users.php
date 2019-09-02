@@ -179,7 +179,7 @@ class users
     {
       $content .= '
         <tr>
-          <td>' . htmlspecialchars(strip_tags($field['name'])) . ': </td><td>' . htmlspecialchars(strip_tags($field['value'])) .'</td>
+          <td valign=top>' . htmlspecialchars(strip_tags($field['name'])) . ': </td><td valign=top>' . htmlspecialchars(strip_tags($field['value'])) .'</td>
         </tr>';
     }
     

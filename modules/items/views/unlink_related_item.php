@@ -38,7 +38,17 @@
     
     $related_id = array_search($items['id'],$related_items);
     
-    echo '<div>' . input_checkbox_tag('items[]',$related_id,array('class'=>'remove_related_item')) . ' <a href="' . url_for('items/info', 'path=' . $path_info['full_path']) . '" target="_blnak">' . items::get_heading_field($related_entities_id,$items['id']) . '</a></div>';
+    if(strlen($related_records->cfg->get('heading_template')))
+    {
+    	$text_pattern = new fieldtype_text_pattern();
+    	$item_name = $text_pattern->output_singe_text($related_records->cfg->get('heading_template'), $related_records->cfg->get('entity_id'), $items);
+    }
+    else
+    {
+    	$item_name = items::get_heading_field($related_records->cfg->get('entity_id'), $items['id'],$items);
+    }
+    
+    echo '<div>' . input_checkbox_tag('items[]',$related_id,array('class'=>'remove_related_item')) . ' <a href="' . url_for('items/info', 'path=' . $path_info['full_path']) . '" target="_blnak">' . $item_name . '</a></div>';
   }
   
   echo input_hidden_tag('related_entities_id',$related_entities_id);

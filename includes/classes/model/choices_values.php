@@ -33,7 +33,7 @@ class choices_values
     	db_query("delete from app_entity_" . $this->entities_id . "_values where items_id='" . db_input($items_id) . "' and fields_id='" . $values['fields_id']. "'");
     	
       //prepare valuse
-      $value = (is_array($values['value']) ? $values['value'] : (strlen($values['value'])>0 ? array($values['value']): array()) );
+      $value = (is_array($values['value']) ? $values['value'] : (strlen($values['value'])>0 ? explode(',',$values['value']): array()) );
       
       $sql_data = array();
       

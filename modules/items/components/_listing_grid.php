@@ -176,6 +176,13 @@ while($item = db_fetch_array($items_query))
 			</li>';  
 }
 
+if($listing_split->number_of_rows==0)
+{
+	$html .= '
+    <li>' . TEXT_NO_RECORDS_FOUND . '</li>
+  ';
+}
+
 $html .= '</ul>';
 
 //add pager

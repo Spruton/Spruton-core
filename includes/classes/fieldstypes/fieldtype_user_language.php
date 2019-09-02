@@ -22,6 +22,6 @@ class fieldtype_user_language
   
   function output($options)
   {
-    return $options['value'];
+    return implode(' ', array_map('ucfirst',explode('_',substr($options['value'],0,-4))));
   }
 }

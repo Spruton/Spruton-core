@@ -4,7 +4,7 @@
 <?php 
   app_reset_selected_items();
    
-  $listing_container = 'entity_items_listing' . $reports_info['id'] . '_' . $reports_info['entities_id'];
+  $listing_container = 'entity_items_listing' . (isset($force_filters_reports_id) ? $force_filters_reports_id : $reports_info['id']) . '_' . $reports_info['entities_id'];
   
   echo input_hidden_tag('entity_items_listing_path',$_GET['path']); 
 ?>
@@ -96,7 +96,7 @@ if(users::has_access('import'))
     </div>
   </div>
   <div class="col-sm-2">
-  	<?php echo listing_types::render_switches($reports_info,$curren_listing_type) ?>
+  	<?php echo (isset($force_filters_reports_id) ? '' : listing_types::render_switches($reports_info,$curren_listing_type)) ?>
   </div>
   <div class="col-sm-5">
     <div class="entitly-listing-buttons-right1">    
