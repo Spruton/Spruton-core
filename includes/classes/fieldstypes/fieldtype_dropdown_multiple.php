@@ -49,12 +49,12 @@ class fieldtype_dropdown_multiple
     //use global lists if exsit    
     if($cfg->get('use_global_list')>0)
     {
-      $choices = global_lists::get_choices($cfg->get('use_global_list'),($field['is_required']==1 ? false:true));
+      $choices = global_lists::get_choices($cfg->get('use_global_list'),($field['is_required']==1 ? false:true),'',$obj['field_' . $field['id']],true);
       $default_id = global_lists::get_choices_default_id($cfg->get('use_global_list'));
     }
     else
     {                    
-      $choices = fields_choices::get_choices($field['id'],($field['is_required']==1 ? false:true),'',$cfg->get('display_choices_values'));
+      $choices = fields_choices::get_choices($field['id'],($field['is_required']==1 ? false:true),'',$cfg->get('display_choices_values'),$obj['field_' . $field['id']],true);
       $default_id = fields_choices::get_default_id($field['id']);
     }
     
@@ -89,10 +89,12 @@ class fieldtype_dropdown_multiple
   {  	  	
     $filters = $options['filters'];
     $sql_query = $options['sql_query'];
+    
+    $prefix = (strlen($options['prefix']) ? $options['prefix'] : 'e');
   	        
   	if(strlen($filters['filters_values'])>0)
     {  
-      $sql_query[] = "(select count(*) from app_entity_" . $options['entities_id'] . "_values as cv where cv.items_id=e.id and cv.fields_id='" . db_input($options['filters']['fields_id'])  . "' and cv.value in (" . $filters['filters_values'] . ")) " . ($filters['filters_condition']=='include' ? '>0': '=0');
+      $sql_query[] = "(select count(*) from app_entity_" . $options['entities_id'] . "_values as cv where cv.items_id=" . $prefix . ".id and cv.fields_id='" . db_input($options['filters']['fields_id'])  . "' and cv.value in (" . $filters['filters_values'] . ")) " . ($filters['filters_condition']=='include' ? '>0': '=0');
     }
     
     return $sql_query;

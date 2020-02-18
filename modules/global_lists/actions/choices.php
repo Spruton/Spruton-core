@@ -13,9 +13,11 @@ switch($app_module_action)
                         'parent_id'=>(strlen($_POST['parent_id'])==0 ? 0 : $_POST['parent_id']),
                         'name'=>$_POST['name'],                                                
                         'is_default'=>(isset($_POST['is_default']) ? $_POST['is_default']:0),
+                        'is_active'=>(isset($_POST['is_active']) ? $_POST['is_active']:0),
                         'bg_color'=>$_POST['bg_color'],                        
                         'sort_order'=>$_POST['sort_order'],
                         'users'=> (isset($_POST['users']) ? implode(',',$_POST['users']):''),
+                        'notes'=>$_POST['notes'],
                         );
                                                                               
       if(isset($_POST['is_default']))

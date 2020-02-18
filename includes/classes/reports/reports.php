@@ -332,6 +332,8 @@ class reports
   	global $search_keywords;
   	
   	$filters_values = $field['filters_values'];
+  	
+  	//print_rr($field);
   	  	  
   	if(app_parse_search_string($filters_values,$search_keywords))
   	{
@@ -404,15 +406,15 @@ class reports
   							$where_str .= " " . $search_keywords[$i] . " ";
   							break;
   						case 'and':
-  						case 'or':
-  							$search_type =  $search_keywords[$i];
+  						case 'or':  							
+  							$search_type = ($field['filters_condition']=='search_type_match' ? 'and' : $search_keywords[$i]);
   							$where_str .= " " . $search_type . " ";
   							break;
   						default:
   							$keyword = $search_keywords[$i];
-  	  							
-  							$where_str .= "e.field_" . $field['fields_id'] . " like '%" . db_input($keyword) . "%'";
-  							
+  	  							  							  									  							
+      					$where_str .= "e.field_" . $field['fields_id'] . " like '%" . db_input($keyword) . "%'";
+      					  							  							
   							break;
   					}
   				}
@@ -627,21 +629,32 @@ class reports
   public static function prepare_dates_sql_filters($filters, $prefix = 'e')
   {  
   	
-  	$prefix = (strlen($prefix) ? $prefix : 'e');
+  	if($prefix==false)
+  	{
+  		$prefix = '';
+  	}
+  	else
+  	{
+  		$prefix = (strlen($prefix) ? $prefix . '.': 'e.');
+  	}
   	
     if($filters['type']=='fieldtype_date_added')
     {
-      $field_name = $prefix . '.date_added';
+      $field_name = $prefix . 'date_added';
     }
     elseif($filters['type']=='fieldtype_date_updated')
     {
-    	$field_name = $prefix . '.date_updated';
+    	$field_name = $prefix . 'date_updated';
     }
     else
     {
-      $field_name = $prefix . '.field_' . $filters['fields_id']; 
+      $field_name = $prefix . 'field_' . $filters['fields_id']; 
     }
-     
+    
+		//to fix issue with FROM_UNIXTIME that return -1 hour difference then php 	
+    {
+    	$field_name = $field_name . '+3600';
+    }     
     
     $sql = array();
     
@@ -997,6 +1010,16 @@ class reports
       case 'fieldtype_auto_increment':
           $html = $filters_values;        
         break;
+      case 'fieldtype_access_group':
+      	
+	      	$list = array();
+	      	foreach(explode(',',$filters_values) as $id)
+	      	{
+	      		$list[] = access_groups::get_name_by_id($id);
+	      	}
+	      	
+	      	$html = implode($separator,$list);
+      	break;
       case 'fieldtype_autostatus':
       case 'fieldtype_checkboxes':
       case 'fieldtype_radioboxes':
@@ -1006,6 +1029,7 @@ class reports
       case 'fieldtype_grouped_users':
       case 'fieldtype_image_map':
       case 'fieldtype_tags':
+      case 'fieldtype_stages':
       
           $cfg = new fields_types_cfg($field_info['configuration']);
                     
@@ -1048,6 +1072,7 @@ class reports
       case 'fieldtype_date_updated':
       case 'fieldtype_input_date':
       case 'fieldtype_input_datetime':
+      case 'fieldtype_dynamic_date':
           $values = explode(',',$filters_values);
           
           if(strlen($values[0])>0)
@@ -1177,6 +1202,7 @@ class reports
   			case 'fieldtype_dropdown':
   			case 'fieldtype_autostatus':
   			case 'fieldtype_radioboxes':
+  			case 'fieldtype_stages':
   				return " and e.field_" . $filter_by[0] . " = '" . $filter_by[1] . "'";
   				break;
   			default:  				

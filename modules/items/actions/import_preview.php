@@ -5,6 +5,32 @@ if(!users::has_access('import') or !strlen($app_path))
 	redirect_to('dashboard/access_forbidden');
 }
 
+$multilevel_import = (isset($_POST['multilevel_import']) ? _post::int('multilevel_import'):0);
+
+//check heading fields
+if($multilevel_import>0)
+{
+	$choices = [];
+	$choices[] = $multilevel_import;
+	foreach(entities::get_parents($multilevel_import) as $entity_id)
+	{
+		$choices[] = $entity_id;
+
+		if($entity_id == $current_entity_id) break;
+	}
+	
+	$choices = array_reverse($choices);
+	
+	foreach($choices as $entity_id)
+	{
+		if(!fields::get_heading_id($entity_id))
+		{
+			$alerts->add(sprintf(TEXT_MULTI_LEVEL_IMPORT_HEADING_ERROR,entities::get_name_by_id($entity_id)),'error');
+			redirect_to('items/items','path=' . $app_path);
+		}
+	}
+}
+
 $worksheet = array();
 
 if(strlen($filename = $_FILES['filename']['name'])>0)
@@ -60,7 +86,7 @@ if(isset($_POST['import_template']))
 		$templates_query = db_query("select * from app_ext_import_templates where id='" . (int)$_POST['import_template']. "'");
 		if($templates = db_fetch_array($templates_query))
 		{
-			$import_fields_list = (strlen($templates['import_fields']) ? json_decode($templates['import_fields']):[]);
+			$import_fields_list = (strlen($templates['import_fields']) ? json_decode($templates['import_fields'],true):[]);
 			foreach($import_fields_list as $k=>$v)
 			{
 				if($v>0)
@@ -68,6 +94,6 @@ if(isset($_POST['import_template']))
 					$import_fields[$k] = $v;
 				}
 			}
-		}
+		}		
 	}
 }

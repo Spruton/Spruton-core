@@ -18,7 +18,7 @@ while($item = db_fetch_array($items_query))
 {
 	$html .= '
 			<li>
-				<table style="width: 100%">
+				<table style="width: 100%" ' . (($users_notifications->has($item['id']) and $entity_cfg->get('disable_highlight_unread')!=1) ? 'class="unread-item-row"':''). '>
 			';
 	
 	
@@ -107,9 +107,9 @@ while($item = db_fetch_array($items_query))
 					
 				$value = '<a ' . $popup_html . ' class="item_heading_link" href="' . url_for('items/info', 'path=' . $path . '&redirect_to=subentity&gotopage[' . $_POST['reports_id'] . ']=' . $_POST['page']) . '">' . fields_types::output($output_options) . '</a>';
 					
-				if($entity_cfg['use_comments']==1 and $user_has_comments_access)
+				if($entity_cfg->get('use_comments')==1 and $user_has_comments_access and $entity_cfg->get('display_last_comment_in_listing',1))
 				{
-					$html .= comments::get_last_comment_info($current_entity_id,$item['id'],$path, $fields_access_schema);
+					$value .= comments::get_last_comment_info($current_entity_id,$item['id'],$path, $fields_access_schema);
 				}
 					
 				$value .= '</td>';
@@ -126,6 +126,8 @@ while($item = db_fetch_array($items_query))
 				
 			$section_fields[] = [
 					'name' => fields_types::get_option($field['type'],'name',$field['name']),
+					'short_name' => $field['short_name'],
+					'long_name' => $field['long_name'],
 					'value' => $value,
 			];
 				
@@ -140,7 +142,7 @@ while($item = db_fetch_array($items_query))
 			{
 				$html .= '
 						<tr>
-							' . ($section['display_field_names'] ? '<th>' . $field['name'] . ': </th>' : '') . '
+							' . ($section['display_field_names'] ? '<th ' . (strlen($field['short_name']) ? 'title="' . htmlspecialchars($field['long_name']) . '"':'' ) . '>' . $field['name'] . ': </th>' : '') . '
 							<td class="' . ($section['display_field_names'] ? 'with_th' : '') . '">' . $field['value'] . '</td>
 						</tr>
 						';

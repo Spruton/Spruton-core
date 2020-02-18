@@ -25,6 +25,8 @@ class fieldtype_todo_list
     $cfg[] = array('title'=>TEXT_FOR_SUCCESSFUL_CHECK, 'name'=>'text_check','type'=>'input', 'params'=>array('class'=>'form-control input-large'));
     $cfg[] = array('title'=>TEXT_FOR_UNCHECK, 'name'=>'text_unckeck','type'=>'input', 'params'=>array('class'=>'form-control input-large'));
     
+    $cfg[] = array('title'=>TEXT_HIDE_CHECKBOXES_IF_NO_ACCESS, 'name'=>'hide_checkboxes','type'=>'checkbox');
+    
                              
     return $cfg;
   }
@@ -46,6 +48,7 @@ class fieldtype_todo_list
   
   function output($options)
   {
+  	global $app_user;
   	
   	$html_listing = '';
   	if(strlen($options['value']))
@@ -67,14 +70,24 @@ class fieldtype_todo_list
   	}
   	else
   	{
-  		if(isset($options['is_listing']) or isset($options['is_email']))
+  		
+  		$cfg = new fields_types_cfg($options['field']['configuration']);
+  		
+  		//get default filed acess cfg
+  		$fields_access_schema = users::get_fields_access_schema($options['field']['entities_id'],$app_user['group_id']);
+  		
+  		//get field access rules
+  		$access_rules = new access_rules($options['field']['entities_id'], $options['item']);
+  		$fields_access_schema += $access_rules->get_fields_view_only_access();
+  		
+  		$hide_checkboxes = (isset($fields_access_schema[$options['field']['id']]) and $cfg->get('hide_checkboxes')==1 ? true : false);
+  		  		  		  	
+  		if(isset($options['is_listing']) or isset($options['is_email']) or $hide_checkboxes)
   		{
   			return $html_listing;  			
   		}
   		else
-  		{
-  			$cfg = new fields_types_cfg($options['field']['configuration']);
-  			
+  		{  			  			
   			$html = '';
   			if(strlen($options['value']))
   			{

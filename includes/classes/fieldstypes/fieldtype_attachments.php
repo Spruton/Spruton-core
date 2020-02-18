@@ -48,7 +48,7 @@ class fieldtype_attachments
     $timestamp = time();
     
     $delete_file_url = '';
-    
+           
     if($app_items_form_name=='registration_form')
     {
     	$form_token = md5($app_session_token . $timestamp);
@@ -67,6 +67,13 @@ class fieldtype_attachments
     	$uploadScript = url_for('users/account','action=attachments_upload&path=' . $current_path . '&field_id=' . $field_id ,true);
     	$previewScript = url_for('users/account','action=attachments_preview&field_id=' . $field_id . '&path=' . $current_path . '&token=' . $form_token);
     	$delete_file_url = url_for('users/account','action=attachments_delete_in_queue');
+    }
+    elseif($app_items_form_name=='ipage_form')
+    {    	    	
+    	$form_token = md5($app_user['id']  . $timestamp);
+    	$uploadScript = url_for('ext/ipages/configuration','action=attachments_upload&field_id=' . $field_id ,true);
+    	$previewScript = url_for('ext/ipages/configuration','action=attachments_preview&field_id=' . $field_id . '&token=' . $form_token);
+    	$delete_file_url = url_for('ext/ipages/configuration','action=attachments_delete_in_queue');
     }
     else
     {
@@ -225,18 +232,49 @@ class fieldtype_attachments
   }
   
   function output($options)
-  {    
+  {      
+  	$options_cfg = new fields_types_options_cfg($options);
+  	
     if(strlen($options['value'])>0)
     {
+    	
+    	$use_file_storage = false;
+    	
+    	//check if field using file storage
+    	if(isset($options['field']['id']))
+    		if(is_ext_installed() and $options['field']['id']>0)
+    		{
+    			$use_file_storage = file_storage::check($options['field']['id']);
+    		}
+    	
     	if(isset($options['is_public_form']))
     	{
     		$html = array();
     		foreach(explode(',',$options['value']) as $filename)
     		{
     			$file = attachments::parse_filename($filename);
-    			$html[] = link_to($file['name'],url_for('ext/public/check','action=download_attachment&id=' . $options['is_public_form'] . '&item=' . $options['item']['id'] . '&field=' . $options['field']['id'] . '&file=' . urlencode(base64_encode($filename))),array('target'=>'_blank')) . (file_storage::check($options['field']['id']) ? '' :  '  <small>(' . $file['size']. ')</small>');
+    			$html[] = link_to($file['name'],url_for('ext/public/check','action=download_attachment&id=' . $options['is_public_form'] . '&item=' . $options['item']['id'] . '&field=' . $options['field']['id'] . '&file=' . urlencode(base64_encode($filename))),array('target'=>'_blank')) . ($use_file_storage ? '' :  '  <small>(' . $file['size']. ')</small>');
     		}
     		
+    		return implode('<br>',$html);
+    	}
+    	elseif(isset($options['is_email']))
+    	{    		
+    		$html = array();
+    		foreach(explode(',',$options['value']) as $filename)
+    		{
+    			$file = attachments::parse_filename($filename);
+    			
+    			if($options_cfg->get('hide_attachments_url')==1)
+    			{
+    				$html[] = $file['name'];
+    			}
+    			else
+    			{
+    				$html[] = link_to($file['name'],url_for( 'items/info','path=' . $options['path'] . '&action=download_attachment&file=' . urlencode(base64_encode($filename)) . '&field=' . $options['field']['id'] ),array('target'=>'_blank')) . ($use_file_storage ? '' :  '  <small>(' . $file['size']. ')</small>');
+    			}
+    		}
+    		    		    	
     		return implode('<br>',$html);
     	}
       elseif(isset($options['is_export']))
@@ -254,7 +292,7 @@ class fieldtype_attachments
       { 
       	$is_listing = (isset($options['is_listing']) ? true : false);
       	
-        $cfg = new fields_types_cfg($options['field']['configuration']);
+        $cfg = new fields_types_cfg((isset($options['field']['configuration']) ? $options['field']['configuration'] : ''));
                         
         $image_gallery = array();
         
@@ -272,14 +310,7 @@ class fieldtype_attachments
 	                <td>';       
         } 
                         
-        $use_file_storage = false;
         
-        //check if field using file storage
-        if(isset($options['field']['id']))
-	        if(is_ext_installed() and $options['field']['id']>0)
-	        {
-	        	$use_file_storage = file_storage::check($options['field']['id']);
-	        }
         
         if($use_file_storage)
         {

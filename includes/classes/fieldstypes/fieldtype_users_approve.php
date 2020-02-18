@@ -252,7 +252,9 @@ class fieldtype_users_approve
     if(!strlen($options['value'])) return '';
     
     $cfg = new fields_types_cfg($options['field']['configuration']);
-                    
+     
+    //print_rr($options);
+    
     if(isset($options['is_print']) and $cfg->get('use_signature')==1)
     {
     	$html = '';
@@ -297,7 +299,7 @@ class fieldtype_users_approve
     	
     	return $html;
     }	
-    elseif(isset($options['is_export']) or isset($options['is_email']))
+    elseif(isset($options['is_export']) or isset($options['is_email']) or isset($options['is_comments_listing']))
     {
       $users_list = array(); 
       foreach(explode(',',$options['value']) as $id)
@@ -308,7 +310,7 @@ class fieldtype_users_approve
         }
       }
       
-      if(isset($options['is_email']))
+      if(isset($options['is_email'])  or isset($options['is_comments_listing']))
       {
       	return implode('<br>',$users_list);
       }

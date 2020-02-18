@@ -20,8 +20,10 @@ switch($app_module_action)
   	
   	$template_info = db_find('app_ext_export_templates',(int)$_GET['templates_id']);
   	
-  	$print_template = '';
+  	$selected_items_array = $app_selected_items[$_POST['reports_id']];
   	
+  	$print_template = export_templates::get_template_extra($selected_items_array, $template_info,'template_header'); 
+  	    	
   	$selected_items = implode(',',$app_selected_items[$_POST['reports_id']]);
   	
   	//prepare forumulas query
@@ -37,11 +39,19 @@ switch($app_module_action)
 			
 			if($count_items>1 and $count_items!=$count and $template_info['split_into_pages']==1)
 			{
+				$print_template .= export_templates::get_template_extra($selected_items_array, $template_info,'template_footer');
+				
 				$print_template .= ($app_module_action=='export_word' ? '<br style="page-break-before: always">' : '<p style="page-break-after: always;"></p>');
+				
+				$print_template .= export_templates::get_template_extra($selected_items_array, $template_info,'template_header');
 			}
 			
 			$count++;
   	}
+  	  	
+  	$print_template .= export_templates::get_template_extra($selected_items_array, $template_info,'template_footer');
+  	
+  	
       
       $html = '
       <html>

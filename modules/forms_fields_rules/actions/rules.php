@@ -82,8 +82,22 @@ switch($app_module_action)
 						
 		$choices = array();	
 		
+		//chandle boolean
+		if(in_array($field_info['type'],['fieldtype_boolean_checkbox','fieldtype_boolean']))
+		{
+			$choices[1] = TEXT_BOOLEAN_TRUE;
+			$choices[0] = TEXT_BOOLEAN_FALSE;
+			
+			foreach($choices as $k=>$v)
+			{
+				if(in_array($k,$exclude_choices))
+				{
+					unset($choices[$k]);
+				}
+			}
+		}
 		//handle users groups
-		if($field_info['type']=='fieldtype_user_accessgroups')
+		elseif($field_info['type']=='fieldtype_user_accessgroups')
 		{
 			foreach(access_groups::get_choices() as $id=>$name)
 			{

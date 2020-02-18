@@ -3,8 +3,15 @@
 
 <?php 
   app_reset_selected_items();
+  
+  //print_rr($reports_info);
    
   $listing_container = 'entity_items_listing' . (isset($force_filters_reports_id) ? $force_filters_reports_id : $reports_info['id']) . '_' . $reports_info['entities_id'];
+  
+  if(isset($force_filters_reports_id))
+  {
+  	$reports_info = $default_reports_info;
+  }
   
   echo input_hidden_tag('entity_items_listing_path',$_GET['path']); 
 ?>
@@ -103,7 +110,7 @@ if(users::has_access('import'))
       <?php echo render_listing_search_form($entity_info['id'],$listing_container, $reports_info['id']) ?>
       
       <?php 
-      	if(!filters_preivew::has_default_panel_access($entity_cfg) and $reports_info['reports_type']!='default' and (in_array($app_user['group_id'],explode(',',$entity_cfg->get('listing_config_access'))) or !strlen($entity_cfg->get('listing_config_access'))))
+      	if(!filters_preivew::has_default_panel_access($entity_cfg) and !isset($force_filters_reports_id) and (in_array($app_user['group_id'],explode(',',$entity_cfg->get('listing_config_access'))) or !strlen($entity_cfg->get('listing_config_access'))))
       	{
       		$html = '
 			      <div class="btn-group" style="float:right">

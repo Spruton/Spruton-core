@@ -6,7 +6,7 @@ $reports_info = db_find('app_reports',$_POST['reports_id']);
 
 $fields_access_schema = users::get_fields_access_schema($current_entity_id,$app_user['group_id']);
 $current_entity_info = db_find('app_entities',$current_entity_id);
-$entity_cfg = entities::get_cfg($current_entity_id);
+$entity_cfg = new entities_cfg($current_entity_id);
 
 $listing = new items_listing($_POST['reports_id'],$entity_cfg);
 

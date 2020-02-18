@@ -32,6 +32,9 @@ $dynamic_fields = [
 		'fieldtype_days_difference',		
 		'fieldtype_formula',
 		'fieldtype_mysql_query',
+		'fieldtype_dynamic_date',
+		'fieldtype_date_added',
+		'fieldtype_date_updated',
 ];
 
 //autostatus fields to update

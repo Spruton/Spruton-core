@@ -33,7 +33,7 @@ Page header
 }
 .header .search-form .form-control,
 .page-sidebar-menu .search-form .form-control {
-  color: #ffffff;
+  color: #444444;
   background-color: #f7f7f7;
   border-color: #c4c4c4;
 }

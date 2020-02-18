@@ -59,23 +59,30 @@ class global_lists
         
   } 
     
-  static function get_choices_tree($lists_id,$parent_id = 0,$tree = array(),$level=0)
+  static function get_choices_tree($lists_id,$parent_id = 0,$tree = array(),$level=0,$selected_values = '', $check_status = false)
   {
-    $choices_query = db_query("select * from app_global_lists_choices where lists_id = '" . db_input($lists_id). "' and parent_id='" . db_input($parent_id). "' order by sort_order, name");
+  	$where_sql = '';
+  	 
+  	if($check_status)
+  	{
+  		$where_sql = " and (is_active=1 " . (strlen($selected_values) ? " or id in (" . $selected_values . ")":'') . ") ";
+  	}
+  	
+    $choices_query = db_query("select * from app_global_lists_choices where lists_id = '" . db_input($lists_id). "' and parent_id='" . db_input($parent_id). "' {$where_sql} order by sort_order, name");
     
     while($v = db_fetch_array($choices_query))
     {
       $tree[] = array_merge($v,array('level'=>$level));
       
-      $tree = self::get_choices_tree($lists_id,$v['id'],$tree,$level+1);
+      $tree = self::get_choices_tree($lists_id,$v['id'],$tree,$level+1,$selected_values,$check_status);
     }
     
     return $tree;
   }
   
-  public static function get_js_level_tree($lists_id,$parent_id = 0,$tree = array(),$level=0)
+  public static function get_js_level_tree($lists_id,$parent_id = 0,$tree = array(),$level=0,$selected_values = '')
   {
-  	$choices_query = db_query("select * from app_global_lists_choices where lists_id = '" . db_input($lists_id). "' and parent_id='" . db_input($parent_id). "' order by sort_order, name");
+  	$choices_query = db_query("select * from app_global_lists_choices where lists_id = '" . db_input($lists_id). "' and parent_id='" . db_input($parent_id). "' and (is_active=1 " . (strlen($selected_values) ? " or id in (" . $selected_values . ")":'') . ") order by sort_order, name");
   	 
   
   	while($v = db_fetch_array($choices_query))
@@ -86,7 +93,7 @@ class global_lists
   					$(update_field).append($("<option>", {value: ' . $v['id'] . ',text: "' . addslashes(strip_tags($v['name'])). '"}));';
   		}
   
-  		$tree = self::get_js_level_tree($lists_id,$v['id'],$tree,$level+1);
+  		$tree = self::get_js_level_tree($lists_id,$v['id'],$tree,$level+1,$selected_values);
   	}
   		
   	return $tree;
@@ -118,11 +125,11 @@ class global_lists
     return $tree;
   }
   
-  public static function get_choices($lists_id,$add_empty = true, $empty_text = '')
+  public static function get_choices($lists_id,$add_empty = true, $empty_text = '', $selected_values = '', $check_status = false)
   {
     $choices = array();
     
-    $tree = self::get_choices_tree($lists_id);
+    $tree = self::get_choices_tree($lists_id,0,[],0,$selected_values,$check_status);
             
     if(count($tree)>0)
     {

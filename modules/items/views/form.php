@@ -9,7 +9,7 @@
     $header_menu_button = entities_templates::render_modal_header_menu($current_entity_id);
   }
   
-  echo ajax_modal_template_header($header_menu_button . (strlen($entity_cfg['window_heading'])>0 ? $entity_cfg['window_heading'] : TEXT_INFO));
+  echo ajax_modal_template_header($header_menu_button . (strlen($entity_cfg->get('window_heading'))>0 ? $entity_cfg->get('window_heading') : TEXT_INFO));
   
   $is_new_item = (!isset($_GET['id']) ? true:false);
   
@@ -96,7 +96,7 @@
         	$v['is_required'] = (in_array($v['type'],array('fieldtype_user_firstname','fieldtype_user_lastname','fieldtype_user_username','fieldtype_user_email')) ?  1 : $v['is_required']);
         	
 	        $html_tab_content[$tabs['id']] .='
-	          <div class="form-group form-group-' . $v['id'] . '">
+	          <div class="form-group form-group-' . $v['id'] . ' form-group-' . $v['type'] . '">
 	          	<label class="col-md-3 control-label" for="fields_' . $v['id']  . '">' . 
 	              ($v['is_required']==1 ? '<span class="required-label">*</span>':'') .
 	              ($v['tooltip_display_as']=='icon' ? tooltip_icon($v['tooltip']) :'') .
@@ -192,7 +192,7 @@
       	$v['is_required'] = (in_array($v['type'],array('fieldtype_user_firstname','fieldtype_user_lastname','fieldtype_user_username','fieldtype_user_email')) ?  1 : $v['is_required']);
       	
 	      $html .='
-	          <div class="form-group form-group-' . $v['id'] . '">
+	          <div class="form-group form-group-' . $v['id'] . ' form-group-' . $v['type'] . '">
 	          	<label class="col-md-3 control-label" for="fields_' . $v['id']  . '">' .                
 	              ($v['is_required']==1 ? '<span class="required-label">*</span>':'') .
 	              ($v['tooltip_display_as']=='icon' ? tooltip_icon($v['tooltip']) :'') . 

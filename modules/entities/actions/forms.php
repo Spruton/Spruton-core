@@ -2,6 +2,16 @@
 
 switch($app_module_action)
 {
+	case 'save_javascript':
+		$cfg = new entities_cfg($_GET['entities_id']);
+		$cfg->set('javascript_in_from',$_POST['javascript_in_from']);
+		$cfg->set('javascript_onsubmit',$_POST['javascript_onsubmit']);
+		
+		$alerts->add(TEXT_CONFIGURATION_UPDATED,'success');
+		
+		redirect_to('entities/forms','entities_id=' . $_GET['entities_id']);
+		
+		break;
   case 'sort_fields':
         //print_r($_POST);
         $tabs_query = db_fetch_all('app_forms_tabs',"entities_id='" . db_input($_GET['entities_id']) . "' order by  sort_order, name");

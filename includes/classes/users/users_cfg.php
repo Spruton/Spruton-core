@@ -8,6 +8,8 @@ class users_cfg
   {
     global $app_user;
     
+    if(!isset($app_user['id'])) return false;
+    	
     $cfg_query = db_query("select * from app_users_configuration where users_id='" . db_input($app_user['id']) . "'");   
     while ($v = db_fetch_array($cfg_query)) 
     {          

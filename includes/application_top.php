@@ -1,5 +1,5 @@
 <?php
-  define('PROJECT_VERSION','2.5.2');
+  define('PROJECT_VERSION','1.6.1');
   define('PROJECT_VERSION_DEV','');
   
 //check if installed
@@ -114,6 +114,12 @@
   	$app_previously_logged_user = 0;
   	app_session_register('app_previously_logged_user');
   }
+  
+  if(!app_session_is_registered('two_step_verification_info'))
+  {
+  	$two_step_verification_info = [];
+  	app_session_register('two_step_verification_info');
+  }
         
 
 //get module  
@@ -177,13 +183,17 @@
   		'users/login',
   		'users/restore_password',
   		'users/ldap_login',
+  		'users/signature_login',
   		'ext/calendar/icalexport',
   		'ext/public/form',
   		'ext/public/check',
   		'dashboard/vpic',  		
   		'ext/telephony/save_call',
   		'dashboard/select2_json',
-  		'dashboard/select2_ml_json'
+  		'dashboard/select2_ml_json',
+  		'export/xml',
+  		'export/file',
+  		'users/2step_verification',
   );
   
   if(CFG_USE_PUBLIC_REGISTRATION==1)
@@ -201,7 +211,10 @@
     }
             
     if(isset($_COOKIE["app_remember_me"]) and isset($_COOKIE["app_stay_logged"]))
-    {      
+    { 
+    	//do not ask verification do if login by remember me function
+    	$two_step_verification_info['is_checked']=true;
+    	
       users::login(base64_decode($_COOKIE["app_remember_user"]),'',1,base64_decode($_COOKIE["app_remember_pass"]));
     }
     else
@@ -244,7 +257,7 @@
       {
       	$app_users_access = array();
       }
-                             
+                                              
     }
     else
     {
@@ -310,7 +323,10 @@
 //set text direction if not defined in language file
   if(!defined('APP_LANGUAGE_TEXT_DIRECTION')) define('APP_LANGUAGE_TEXT_DIRECTION','ltr');
   
-
+  
+//two step verification check
+  two_step_verification::check();
+  
 //check if maintenance mode enabled
   maintenance_mode::check();  
     

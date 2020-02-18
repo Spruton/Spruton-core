@@ -43,6 +43,8 @@ class fieldtype_entity_multilevel
   
   function get_ajax_configuration($name, $value)
   {
+  	global $app_entities_cache;
+  	
   	$cfg = array();
   	  	  	
   	switch($name)
@@ -90,6 +92,28 @@ class fieldtype_entity_multilevel
   						'<div style="padding-top: 2px;">' . fields::get_available_fields_helper($_POST['entities_id'], 'fields_configuration_copy_values',entities::get_name_by_id($_POST['entities_id'])) . '</div>', 
   						'name'=>'copy_values','type'=>'textarea','tooltip'=>TEXT_COPY_FIELD_VALUES_INFO,'params'=>array('class'=>'form-control input-xlarge')  					
   				);
+  				
+  				
+  				$choices = [];
+  				$choices[''] = '';
+  				$fields_query = db_query("select f.*, t.name as tab_name from app_fields f, app_forms_tabs t where f.type in ('fieldtype_entity','fieldtype_entity_ajax','fieldtype_entity_multilevel') and  f.entities_id='" . $_POST['entities_id'] . "' and f.forms_tabs_id=t.id order by t.sort_order, t.name, f.sort_order, f.name");
+  				while($fields = db_fetch_array($fields_query))
+  				{  					
+  					$field_cfg = new fields_types_cfg($fields['configuration']);
+  					
+  					if($field_cfg->get('entity_id')==$app_entities_cache[$entities_id]['parent_id'])
+  					{
+  						$choices[$fields['id']] = $fields['name'];
+  					}
+  				}
+  				  				  				
+  				$cfg[] = array('title'=>TEXT_PARENT,
+  						'name'=>'force_parent_item_id',
+  						'type'=>'dropdown',
+  						'choices'=>$choices,
+  						'tooltip_icon'=>TEXT_FIELDTYPE_ENTITY_MULTILEVEL_PARENT_FIELD_TIP,
+  						'params'=>array('class'=>'form-control input-xlarge'));
+  					
   			break;
   	}
   	 
@@ -99,7 +123,7 @@ class fieldtype_entity_multilevel
   
   function render($field,$obj,$params = array())
   {
-  	global $app_module_path, $app_layout, $app_action; 
+  	global $app_module_path, $app_layout, $app_action, $app_entities_cache; 
   	
     $cfg = new fields_types_cfg($field['configuration']);
                    
@@ -111,7 +135,17 @@ class fieldtype_entity_multilevel
     	return '';
     }
     
-    $entities_levels[] = $cfg->get('entity_id');
+    if(strlen($cfg->get('force_parent_item_id')))
+    {
+    	$entities_levels = [];
+    	$entities_levels[] = $cfg->get('entity_id');
+    }
+    else
+    {
+    	$entities_levels[] = $cfg->get('entity_id');
+    }	
+    
+    
     
     //print_r($entities_levels);
     
@@ -150,16 +184,23 @@ class fieldtype_entity_multilevel
     	$field_name = ($entities_id == $cfg->get('entity_id') ? 'fields[' . $field['id'] . ']' : 'fields' . $field['id'] . '_entity' . $entities_id );
     	$field_id = ($entities_id == $cfg->get('entity_id') ? 'fields_' . $field['id'] : 'fields' . $field['id'] . '_entity' . $entities_id );
     	
-    	$parent_entity_item_id_val = ($previous_entities_id ? '$("#fields' . $field['id'] . '_entity' . $previous_entities_id  . '").val()' : '0');
+    	if(strlen($cfg->get('force_parent_item_id')))
+    	{
+    		$parent_entity_item_id_val = '$("#fields_' . $cfg->get('force_parent_item_id') . '").val()';
+    	}
+    	else
+    	{
+    		$parent_entity_item_id_val = ($previous_entities_id ? '$("#fields' . $field['id'] . '_entity' . $previous_entities_id  . '").val()' : '0');
+    	}
     	
     	//add "+" button    	
     	if($entities_id==$cfg->get('entity_id'))
-    	{
-    		$button_add_entity_id_check = $entities_levels[$i-1];
-    		
+    	{    		
+    		$button_add_entity_id_check = (isset($entities_levels[$i-1]) ? $entities_levels[$i-1] : 0);
+    		    		    		
 	    	$button_add_html = '';
 	    	if($cfg->get('hide_plus_button')!=1  and $app_action!='account' and $app_action!='processes' and $app_layout!='public_layout.php' and users::has_access_to_entity($cfg->get('entity_id'),'create') and $cfg->get('entity_id')!=1 and !isset($_GET['is_submodal']) )
-	    	{
+	    	{	    			    		
 	    		$url_params = 'is_submodal=true&redirect_to=parent_modal&refresh_field=' . $field['id'];
 	    	    		    	
 	    		$submodal_url = url_for('items/form',$url_params);
@@ -185,13 +226,14 @@ class fieldtype_entity_multilevel
     	$script .= '
     		$("#' . $field_id . '").select2({		      
 		      width: ' . self::get_select2_width_by_class($cfg->get('width'), (strlen($button_add_html) ? true:false)) . ',		      
-		      ' . (in_array($app_layout,['public_layout.php']) ? '':'dropdownParent: $("#ajax-modal"),') . '
+		      ' . ((in_array($app_layout,['public_layout.php']) or in_array($app_module_path,['users/account'])) ? '':'dropdownParent: $("#ajax-modal"),') . '
 		      "language":{
 		        "noResults" : function () { return "' . addslashes(TEXT_NO_RESULTS_FOUND) . '"; },
 		    		"searching" : function () { return "' . addslashes(TEXT_SEARCHING). '"; },
 		    		"errorLoading" : function () { return "' . addslashes(TEXT_RESULTS_COULD_NOT_BE_LOADED). '"; },
 		    		"loadingMore" : function () { return "' . addslashes(TEXT_LOADING_MORE_RESULTS). '"; }		    				
-		      },		
+		      },	
+		    	allowClear: true,		    	
 		      ajax: {
         		url: "' . url_for('dashboard/select2_ml_json','action=select_items&form_type=' . $app_module_path . '&entity_id=' . $entities_id . '&field_id=' . $field['id']) . '",
         		dataType: "json",
@@ -212,7 +254,28 @@ class fieldtype_entity_multilevel
     			';
     	
     	//action to reset dropdown values
-    	if($previous_entities_id)
+    	
+    	if(strlen($cfg->get('force_parent_item_id')))
+    	{
+    		$html_on_change .= '
+    			$("#fields_' . $cfg->get('force_parent_item_id') . '").change(function (e) {
+						$("#' . $field_id . '").empty().trigger("change");
+    		
+						if($(this).val()>0)
+						{								
+							path = "' . $app_entities_cache[$cfg->get('entity_id')]['parent_id'] . '-"+$(this).val()+"/' . $cfg->get('entity_id') . '";
+							$("#btn_submodal_open' . $field['id'] . '").attr("data-submodal-url",$("#btn_submodal_open' . $field['id'] . '").attr("data-submodal-url-tmp")+"&path="+path)
+							
+							$("#btn_submodal_open' . $field['id'] . '").removeClass("hidden")
+    				}
+						else
+						{
+							$("#btn_submodal_open' . $field['id'] . '").addClass("hidden")	
+    				}		
+      		});
+    			';
+    	}
+    	elseif($previous_entities_id)
     	{
     		$html_on_change .= '
     			$("#fields' . $field['id'] . '_entity' . $previous_entities_id  . '").change(function (e) {
@@ -277,6 +340,7 @@ class fieldtype_entity_multilevel
   			}
     				
   		}
+    					
     		
     	$(function(){
     		

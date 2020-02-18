@@ -9,6 +9,7 @@ switch($app_module_action)
                         'name'=>$_POST['name'],                        
                         'users'=> (isset($_POST['users']) ? implode(',',$_POST['users']):''),
                         'is_default'=>(isset($_POST['is_default']) ? $_POST['is_default']:0),
+                        'is_active'=>(isset($_POST['is_active']) ? $_POST['is_active']:0),
                         'bg_color'=>$_POST['bg_color'],                        
                         'sort_order'=>$_POST['sort_order'],
                         'value'=> (isset($_POST['value']) ? str_replace(',','.',$_POST['value']) : ''),

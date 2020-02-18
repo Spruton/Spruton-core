@@ -131,10 +131,10 @@
       	else
       	{
 	        $html .= '
-	          <div class="form-group form-group-' . $v['id'] . '">
+	          <div class="form-group form-group-' . $v['id'] . ' form-group-' . $v['type'] . '">
 	          	<label class="col-md-3 control-label" for="fields_' . $v['id'] . '">' . fields_types::get_option($v['type'],'name',$v['name']) . '</label>
 	            <div class="col-md-9">	
-	          	  ' . fields_types::render($v['type'],$v,$obj,array('is_new_item'=>false)) 
+	          	  ' . fields_types::render($v['type'],$v,$obj,array('is_new_item'=>false,'parent_entity_item_id'=>$obj['parent_item_id'],'form'=>'item')) 
 	                . tooltip_text($v['tooltip']) . '
 	            </div>			
 	          </div>
@@ -213,7 +213,7 @@
 	        <div class="form-group form-group-' . $v['id'] . '">
 	        	<label class="col-md-3 control-label" for="fields_' . $v['id'] . '">' . fields_types::get_option($v['type'],'name',$v['name']) . '</label>
 	          <div class="col-md-9">	
-	        	  ' . fields_types::render($v['type'],$v,$obj,array('is_new_item'=>false)) 
+	        	  ' . fields_types::render($v['type'],$v,$obj,array('is_new_item'=>false,'parent_entity_item_id'=>$obj['parent_item_id'],'form'=>'item')) 
 	              . tooltip_text($v['tooltip']) . '
 	          </div>			
 	        </div>

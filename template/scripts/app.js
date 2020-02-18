@@ -415,29 +415,46 @@ var App = function () {
         // handle search for header search input on enter press
         $('.search-form-header').on('keypress', 'input.form-control', function (e) {
             if (e.which == 13) {
-                $('.search-form-header').submit();
+            	if($('.search-form-header')[0].checkValidity())
+            	{
+                $('.search-form-header').submit();   
                 return false;
+            	}
             }
         });
 
         // handle search for header search input on icon click
         $('.search-form-header').on('click', '.icon-search', function (e) {
-            $('.search-form-header').submit();
-            return false;
+        	if($('.search-form-header')[0].checkValidity())
+        	{
+        		$('.search-form-header').submit();  
+        		return false;
+        	}
+        	else
+        	{        		
+        		$('.search-form-header').find(':submit').click();
+        	}
         });
 
         // handle search for sidebar search input on enter press
         $('.search-form-sidebar').on('keypress', 'input.form-control', function (e) {
-            if (e.which == 13) {
+            if (e.which == 13) 
+            {
+            	if($('.search-form-sidebar')[0].checkValidity())
+            	{	
                 $('.search-form-sidebar').submit();
                 return false;
+            	}
             }
         });
 
         // handle search for sidebar search input on icon click
         $('.search-form-sidebar').on('click', '.icon-search', function (e) {
+        	if($('.search-form-sidebar')[0].checkValidity())
+        	{
             $('.search-form-sidebar').submit();
             return false;
+        	} 
         });
     }
 

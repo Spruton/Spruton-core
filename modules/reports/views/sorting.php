@@ -32,6 +32,10 @@
   {
   	echo form_tag('sorting_form', url_for('ext/common_filters/reports'));
   }
+  elseif($app_redirect_to=='item_pivot_tables')
+  {
+  	echo form_tag('sorting_form', url_for('ext/item_pivot_tables/reports'));
+  }
   elseif(strstr($app_redirect_to,'funnelchart'))
   {
   	$id = str_replace('funnelchart','',$app_redirect_to);
@@ -205,7 +209,7 @@ while($v = db_fetch_array($fields_query))
       prepare_condition_icons();
                
     	$( "ul.sortable" ).sortable({
-    		connectWith: "ul",
+    		connectWith: "ul.sortable",
         cancel:'.condition_icon', 
     		update: function(event,ui)
         {

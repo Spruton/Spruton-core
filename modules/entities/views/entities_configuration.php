@@ -16,42 +16,38 @@
   <div class="tab-pane fade active in" id="general_info">
 
   <div class="form-group">
-  	<label class="col-md-3 control-label" for="cfg_menu_title"><?php echo TEXT_MENU_TITLE; ?></label>
+  	<label class="col-md-3 control-label" for="cfg_menu_title"><?php echo tooltip_icon(TEXT_MENU_TITLE_TOOLTIP) . TEXT_MENU_TITLE; ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_tag('cfg[menu_title]', $cfg->get('menu_title'),array('class'=>'form-control input-large')); ?> 
-      <?php echo tooltip_text(TEXT_MENU_TITLE_TOOLTIP) ?>
+  	  <?php echo input_tag('cfg[menu_title]', $cfg->get('menu_title'),array('class'=>'form-control input-large')); ?>       
     </div>			
   </div>
   
   <div class="form-group">
   	<label class="col-md-3 control-label" for="cfg_menu_title"><?php echo TEXT_MENU_ICON_TITLE; ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_tag('cfg[menu_icon]', $cfg->get('menu_icon'),array('class'=>'form-control input-large')); ?> 
-      <?php echo tooltip_text(TEXT_MENU_ICON_TITLE_TOOLTIP) ?>
+  	  <?php echo input_tag('cfg[menu_icon]', $cfg->get('menu_icon'),array('class'=>'form-control input-large')); ?>
+  	  <?php echo tooltip_text(TEXT_MENU_ICON_TITLE_TOOLTIP) ?>       
     </div>			
   </div>
   
   <div class="form-group">
-  	<label class="col-md-3 control-label" for="cfg_listing_heading"><?php echo TEXT_LISTING_HEADING; ?></label>
+  	<label class="col-md-3 control-label" for="cfg_listing_heading"><?php echo tooltip_icon(TEXT_LISTING_HEADING_TOOLTIP). TEXT_LISTING_HEADING; ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_tag('cfg[listing_heading]', $cfg->get('listing_heading'),array('class'=>'form-control input-large')); ?> 
-      <?php echo tooltip_text(TEXT_LISTING_HEADING_TOOLTIP) ?>
+  	  <?php echo input_tag('cfg[listing_heading]', $cfg->get('listing_heading'),array('class'=>'form-control input-large')); ?>       
     </div>			
   </div>
 
   <div class="form-group">
-  	<label class="col-md-3 control-label" for="cfg_window_heading"><?php echo TEXT_WINDOW_HEADING; ?></label>
+  	<label class="col-md-3 control-label" for="cfg_window_heading"><?php echo tooltip_icon(TEXT_WINDOW_HEADING_TOOLTIP). TEXT_WINDOW_HEADING; ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_tag('cfg[window_heading]', $cfg->get('window_heading'),array('class'=>'form-control input-large')); ?> 
-      <?php echo tooltip_text(TEXT_WINDOW_HEADING_TOOLTIP) ?>
+  	  <?php echo input_tag('cfg[window_heading]', $cfg->get('window_heading'),array('class'=>'form-control input-large')); ?>       
     </div>			
   </div>
   
   <div class="form-group">
-  	<label class="col-md-3 control-label" for="cfg_insert_button"><?php echo TEXT_INSERT_BUTTON_TITLE; ?></label>
+  	<label class="col-md-3 control-label" for="cfg_insert_button"><?php echo tooltip_icon(TEXT_INSERT_BUTTON_TITLE_TOOLTIP) . TEXT_INSERT_BUTTON_TITLE; ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_tag('cfg[insert_button]', $cfg->get('insert_button'),array('class'=>'form-control input-large')); ?> 
-      <?php echo tooltip_text(TEXT_INSERT_BUTTON_TITLE_TOOLTIP) ?>
+  	  <?php echo input_tag('cfg[insert_button]', $cfg->get('insert_button'),array('class'=>'form-control input-large')); ?>       
     </div>			
   </div>  
   
@@ -62,22 +58,43 @@
     </div>			
   </div>
   
+<h3 class="form-section "><?php echo TEXT_DEFAULT_NOTIFICATIONS ?></h3>
+<p class="form-section-description"><?php echo TEXT_DEFAULT_NOTIFICATIONS_INFO ?></p>
   
   <div class="form-group">
-  	<label class="col-md-3 control-label" for="cfg_insert_button"><?php echo TEXT_EMAIL_SUBJECT_NEW_ITEM; ?></label>
+  	<label class="col-md-3 control-label" for="cfg_insert_button"><?php echo tooltip_icon(TEXT_EMAIL_SUBJECT_NEW_ITEM_TOOLTIP) . TEXT_EMAIL_SUBJECT_NEW_ITEM; ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_tag('cfg[email_subject_new_item]', $cfg->get('email_subject_new_item'),array('class'=>'form-control input-large')); ?> 
-      <?php echo tooltip_text(TEXT_EMAIL_SUBJECT_NEW_ITEM_TOOLTIP) ?>
+  	  <?php echo input_tag('cfg[email_subject_new_item]', $cfg->get('email_subject_new_item'),array('class'=>'form-control input-large')); ?>       
     </div>			
   </div> 
   
   <div class="form-group">
-  	<label class="col-md-3 control-label" for="cfg_insert_button"><?php echo TEXT_EMAIL_SUBJECT_UPDATED_ITEM; ?></label>
+  	<label class="col-md-3 control-label" for="cfg_insert_button"><?php echo tooltip_icon(TEXT_EMAIL_SUBJECT_UPDATED_ITEM_TOOLTIP) . TEXT_EMAIL_SUBJECT_UPDATED_ITEM; ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_tag('cfg[email_subject_updated_item]', $cfg->get('email_subject_updated_item'),array('class'=>'form-control input-large')); ?> 
-      <?php echo tooltip_text(TEXT_EMAIL_SUBJECT_UPDATED_ITEM_TOOLTIP) ?>
+  	  <?php echo input_tag('cfg[email_subject_updated_item]', $cfg->get('email_subject_updated_item'),array('class'=>'form-control input-large')); ?>       
     </div>			
   </div>
+  
+	<div class="form-group">
+			<label class="col-md-3 control-label" for="cfg_disable_notification"><?php echo TEXT_DISABLE_EMAIL_NOTIFICATIONS ?></label>
+			<div class="col-md-9">	
+				<?php echo select_tag('cfg[disable_notification]',$default_selector,$cfg->get('disable_notification',0),array('class'=>'form-control input-small')) ?>							 
+			</div>			
+	 </div>
+	 
+	<div class="form-group">
+			<label class="col-md-3 control-label" for="cfg_disable_internal_notification"><?php echo  tooltip_icon(TEXT_DISABLE_INTERNAL_NOTIFICATIONS_INFO) . TEXT_DISABLE_INTERNAL_NOTIFICATIONS ?></label>
+			<div class="col-md-9">	
+				<?php echo  select_tag('cfg[disable_internal_notification]',$default_selector,$cfg->get('disable_internal_notification',0),array('class'=>'form-control input-small')) ?>							 
+			</div>			
+	 </div>
+	 
+	 <div class="form-group">
+			<label class="col-md-3 control-label" for="cfg_disable_highlight_unread"><?php echo tooltip_icon(TEXT_DISABLE_HIGHLIGH_UNREAD_INFO) . TEXT_DISABLE_HIGHLIGH_UNREAD ?></label>
+			<div class="col-md-9">	
+				<?php echo select_tag('cfg[disable_highlight_unread]',$default_selector,$cfg->get('disable_highlight_unread',0),array('class'=>'form-control input-small')) ?>							 
+			</div>			
+	 </div>	 			
         
 
 	</div>
@@ -96,6 +113,14 @@
     <div class="col-md-9">	
   	  <?php echo select_tag('cfg[display_comments_id]',$default_selector, $cfg->get('display_comments_id'),array('class'=>'form-control input-small')); ?> 
       <?php echo tooltip_text(TEXT_DISPLAY_COMMENTS_TOOLTIP) ?>
+    </div>			
+  </div>
+  
+  <div class="form-group">
+  	<label class="col-md-3 control-label" for="cfg_use_comments"><?php echo TEXT_DISPLAY_LAST_COMMENT_IN_LISTING; ?></label>
+    <div class="col-md-9">	
+  	  <?php echo select_tag('cfg[display_last_comment_in_listing]',$default_selector, $cfg->get('display_last_comment_in_listing',1),array('class'=>'form-control input-small')); ?> 
+      <?php echo tooltip_text(TEXT_DISPLAY_LAST_COMMENT_IN_LISTING_INFO) ?>
     </div>			
   </div>
   
@@ -119,6 +144,14 @@
     <div class="col-md-9">	
   	  <?php echo input_tag('cfg[email_subject_new_comment]', $cfg->get('email_subject_new_comment'),array('class'=>'form-control input-large')); ?> 
       <?php echo tooltip_text(TEXT_EMAIL_SUBJECT_NEW_COMMENT_TOOLTIP) ?>
+    </div>			
+  </div>
+  
+  <div class="form-group">
+  	<label class="col-md-3 control-label" for="cfg_send_notification_to_assigned"><?php echo TEXT_SEND_NOTIFICATION_TO_ASSIGNED_ONLY; ?></label>
+    <div class="col-md-9">	
+  	  <?php echo select_tag('cfg[send_notification_to_assigned]',$default_selector, $cfg->get('send_notification_to_assigned',0),array('class'=>'form-control input-small')); ?> 
+      <?php echo tooltip_text(TEXT_SEND_COMMENTS_NOTIFICATION_TO_ASSIGNED_INFO) ?>
     </div>			
   </div>
 

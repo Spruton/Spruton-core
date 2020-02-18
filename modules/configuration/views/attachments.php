@@ -21,6 +21,25 @@
     </div>			
   </div>
   
+<?php 
+$choices = [];
+
+$choices[''] = TEXT_NONE;
+$fields_query = db_query("select f.id,f.name, e.name as entity_name from app_fields f, app_entities e where e.id=f.entities_id and type in ('fieldtype_attachments', 'fieldtype_image','fieldtype_input_file')  order by e.sort_order, e.name, f.name");
+while($fields = db_fetch_array($fields_query))
+{
+	$choices[$fields['entity_name']][$fields['id']] = $fields['name']; 
+}
+?>  
+  
+  <div class="form-group">
+  	<label class="col-md-3 control-label" for="CFG_PUBLIC_ATTACHMENTS"><?php echo TEXT_ALLOW_PUBLIC_ACCESS ?></label>
+    <div class="col-md-9">	
+  	  <?php echo select_tag('CFG[PUBLIC_ATTACHMENTS][]',$choices,CFG_PUBLIC_ATTACHMENTS,array('class'=>'form-control input-xlarge chosen-select','multiple'=>true)); ?>
+  	  <?php echo tooltip_text(TEXT_PUBLIC_ATTACHMENTS_TIP) ?>
+    </div>			
+  </div>
+  
 <h3 class="form-section"></h3>
   
   <div class="form-group">

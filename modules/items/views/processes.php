@@ -122,6 +122,25 @@
 	}
 	
 	$entity_cfg = new entities_cfg($current_entity_id);
+	
+	$processes = new processes($current_entity_id);
+	if($processes->has_move_action($app_process_info['id']) or $processes->has_copy_action($app_process_info['id']))
+	{
+		$item_info = db_query("select parent_item_id from app_entity_{$current_entity_id} where id='{$current_item_id}'");
+		$item = db_fetch_array($item_info);
+		
+		$choices = [];
+		$choices[$item['parent_item_id']] = items::get_heading_field($app_entities_cache[$current_entity_id]['parent_id'], $item['parent_item_id']);
+		
+		$html ='
+				<div class="form-group">
+          	<label class="col-md-3 control-label" for="parent_item_id">' . $app_entities_cache[$app_entities_cache[$app_process_info['entities_id']]['parent_id']]['name'] . '</label>
+            <div class="col-md-9">
+          	  ' . select_entities_tag('parent_item_id',$choices,$item['parent_item_id'],['entities_id'=>$app_entities_cache[$app_process_info['entities_id']]['parent_id'],'class'=>'form-control','data-placeholder'=>TEXT_ENTER_VALUE]) . '              
+            </div>
+          </div>';
+		echo $html;
+	}
 
 //display comments form	
 	if($app_process_info['allow_comments'] and $entity_cfg->get('use_comments')==1)
@@ -174,22 +193,36 @@
 	} 
 	
 //handle manually entered fields
+
+	//get fiels where enter manually is "Yes and use value"
+	$enter_manually_use_value = [];
+	$fields_query = "select af.fields_id, af.value from app_ext_processes_actions_fields af,app_ext_processes_actions pa where af.actions_id=pa.id and af.enter_manually=2 and af.actions_id in (select pa2.id from app_ext_processes_actions pa2 where pa2.process_id='" . $app_process_info['id'] . "') order by pa.sort_order";
+	$fields_query = db_query($fields_query);
+	while($fields = db_fetch_array($fields_query))
+	{
+		$enter_manually_use_value[$fields['fields_id']] = $fields['value']; 
+	}
+	
+	
 	$html = '';
 	$section_name = '';
 	$count_fields = 0;
-	$fields_query = "select af.fields_id from app_ext_processes_actions_fields af,app_ext_processes_actions pa where af.actions_id=pa.id and af.enter_manually=1 and af.actions_id in (select pa2.id from app_ext_processes_actions pa2 where pa2.process_id='" . $app_process_info['id'] . "') order by pa.sort_order";
+	$entities_in_process = [];
+	$fields_query = "select af.fields_id from app_ext_processes_actions_fields af,app_ext_processes_actions pa where af.actions_id=pa.id and af.enter_manually in (1,2) and af.actions_id in (select pa2.id from app_ext_processes_actions pa2 where pa2.process_id='" . $app_process_info['id'] . "') order by pa.sort_order";
 	$fields_query = "select f.* from app_fields f left join app_forms_tabs t on f.forms_tabs_id=t.id  where f.id in ({$fields_query}) order by f.entities_id, t.sort_order, t.name, f.sort_order, f.name";
 	$fields_query = db_query($fields_query);
 	while($fields = db_fetch_array($fields_query))
-	{				
+	{								
 		$v = $fields; 
 		$obj = db_show_columns('app_entity_' . $v['entities_id']);
 		$entity_info = db_find('app_entities',$v['entities_id']);
 		
+		$entities_in_process[$v['entities_id']] = $v['entities_id'];
+		
 		if($section_name!=$entity_info['name'])
 		{
 			$section_name = $entity_info['name'];
-			$html .= '<h3  class="form-section">' . $section_name . '</h3>';
+			$html .= '<h3  class="form-section" style="margin-top:5px;">' . $section_name . '</h3>';
 		}
 		
 		//prepare parent_entity_item_id that will be using for entity field type
@@ -225,9 +258,27 @@
 		//skip fields if no edit access
 		if(isset($fields_access_schema[$v['id']]) and $app_process_info['apply_fields_access_rules']==1) continue;
 		
+		//handle enter manually with value
+		if(isset($enter_manually_use_value[$fields['id']]))
+		{
+			$actions_fields_value = $enter_manually_use_value[$fields['id']];
+			switch($fields['type'])
+			{
+				case 'fieldtype_input_date':
+					$obj['field_' . $fields['id']] = ($actions_fields_value==' ' ? 0 : (strlen($actions_fields_value)<5 ? get_date_timestamp(date('Y-m-d',strtotime($actions_fields_value . ' day'))) : $actions_fields_value));
+					break;
+				case 'fieldtype_input_datetime':
+					$obj['field_' . $fields['id']] = ($actions_fields_value==' ' ? 0 : (strlen($actions_fields_value)<5 ? strtotime($actions_fields_value . ' day') : $actions_fields_value));
+					break;
+				default:
+					$obj['field_' . $fields['id']] = $actions_fields_value;
+					break;
+			}
+		}
+		
 		
 		$html .='
-	          <div class="form-group form-group-' . $v['id'] . '">
+	          <div class="form-group form-group-' . $v['id'] . ' form-group-' . $v['type'] . '">
 	          	<label class="col-md-3 control-label" for="fields_' . $v['id']  . '">' .
 			          	($v['is_required']==1 ? '<span class="required-label">*</span>':'') .
 			          	($v['tooltip_display_as']=='icon' ? tooltip_icon($v['tooltip']) :'') .
@@ -284,6 +335,18 @@
 				app_prepare_modal_action_loading(form)
 				form.submit();
 			},
+
+		//custom error messages
+      messages: {			    
+        <?php 
+	        foreach($entities_in_process as $entities_id)
+	        {
+	        	echo fields::render_required_messages($entities_id);
+	        }
+       	?>			   
+			},
+
+			
 			 //custom erro placment to handle radio etc. 
       errorPlacement: function(error, element) {
         if (element.attr("type") == "radio") 

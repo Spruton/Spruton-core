@@ -20,6 +20,8 @@
 	$app_user['email'] = CFG_EMAIL_ADDRESS_FROM;
 	$app_user['language'] = CFG_APP_LANGUAGE;
 	
+	$entity_cfg = new entities_cfg($current_entity_id);
+	
 	switch($app_module_action)
 	{		
 		case 'save':	

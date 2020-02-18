@@ -83,6 +83,9 @@ class fields_types
     						 'fieldtype_user_roles',
     						 'fieldtype_entity_multilevel',
     						 'fieldtype_users_approve',
+    						 'fieldtype_dynamic_date',
+    						 'fieldtype_access_group',
+    						 'fieldtype_stages',
                  );
   }
   
@@ -124,6 +127,9 @@ class fields_types
     		'fieldtype_text_pattern_static',
     		'fieldtype_user_last_login_date',
     		'fieldtype_google_map',
+    		'fieldtype_google_map_directions',
+    		'fieldtype_dynamic_date',
+    		'fieldtype_signature',    		
     );
   }  
   
@@ -136,6 +142,7 @@ class fields_types
   			'fieldtype_mapbbcode',
   			'fieldtype_parent_value',
   			'fieldtype_google_map',
+  			'fieldtype_google_map_directions',
   	);
   }
   
@@ -146,6 +153,7 @@ class fields_types
   			'fieldtype_mind_map',
   			'fieldtype_mapbbcode',
   			'fieldtype_google_map',
+  			'fieldtype_google_map_directions',
   	);
   }
   
@@ -155,7 +163,7 @@ class fields_types
   	$skip_fields = fields_types::get_reserverd_types_list();
   	
   	//skip not allowed
-  	$skip_fields .= ",'fieldtype_entity_multilevel','fieldtype_user_roles','fieldtype_users_approve','fieldtype_autostatus','fieldtype_google_map','fieldtype_mapbbcode','fieldtype_mysql_query','fieldtype_formula','fieldtype_days_difference','fieldtype_hours_difference','fieldtype_users','fieldtype_input_numeric_comments','fieldtype_input_file','fieldtype_attachments','fieldtype_related_records','fieldtype_parent_value'";
+  	$skip_fields .= ",'fieldtype_access_group','fieldtype_user_roles','fieldtype_users_approve','fieldtype_autostatus','fieldtype_google_map','fieldtype_mysql_query','fieldtype_formula','fieldtype_days_difference','fieldtype_hours_difference','fieldtype_users','fieldtype_input_numeric_comments','fieldtype_input_file','fieldtype_attachments','fieldtype_related_records','fieldtype_parent_value'";
   	
   	//skip users fields
   	$skip_fields .= ",'fieldtype_user_status','fieldtype_user_accessgroups','fieldtype_user_photo','fieldtype_user_language','fieldtype_user_skin'";
@@ -384,6 +392,25 @@ class fields_types
    		case 'fieldtype_users_approve':
    				$tooltip = TEXT_FIELDTYPE_USERS_APPROVE_TOOLTIP;
    				break;
+   		case 'fieldtype_google_map_directions':
+   				$tooltip = TEXT_FIELDTYPE_GOOGLE_MAP_DIRETIONS_TOOLTIP;
+   				break;
+   		case 'fieldtype_dynamic_date':
+   				$tooltip = TEXT_FIELDTYPE_DYNAMIC_DATE_TOOLTIP;
+   				break;
+   		case 'fieldtype_access_group':
+   				$tooltip = TEXT_FIELDTYPE_ACCESS_GROUP_TOOLTIP;
+   				break;
+   		case 'fieldtype_signature':
+   				$tooltip = TEXT_FIELDTYPE_SIGNATURE_TOOLTIP;
+   				break;
+   		case 'fieldtype_stages':
+   				$tooltip = TEXT_FIELDTYPE_STAGES_TOOLTIP;
+   				break;
+   		case 'fieldtype_iframe':
+   				$tooltip = TEXT_FIELDTYPE_IFRAME_TOOLTIP;
+   				break;
+   				
    		   				
     }
     
@@ -398,6 +425,7 @@ class fields_types
     		'fieldtype_input_masked',
     		'fieldtype_input_protected',
         'fieldtype_input_url',
+    		'fieldtype_iframe',
     		'fieldtype_input_email',                                                      
     		'fieldtype_phone',
     );
@@ -413,6 +441,7 @@ class fields_types
     $fieldtypes[TEXT_FIELDS_TYPES_GROUP_DATES] = array(
     		'fieldtype_input_date',
         'fieldtype_input_datetime',
+    		'fieldtype_dynamic_date',
     		'fieldtype_years_difference',
     		'fieldtype_months_difference',
     		'fieldtype_days_difference',
@@ -447,6 +476,7 @@ class fields_types
     $fieldtypes[TEXT_FIELDS_TYPES_GROUP_USERS] = array(
     		'fieldtype_users',
         'fieldtype_grouped_users',
+    		'fieldtype_access_group',
     		'fieldtype_user_roles',
     		'fieldtype_users_approve',
     );
@@ -462,6 +492,7 @@ class fields_types
     $fieldtypes[TEXT_MAPS] = array(
     		'fieldtype_mapbbcode',
     		'fieldtype_google_map',
+    		'fieldtype_google_map_directions',
     		'fieldtype_image_map',
     		'fieldtype_mind_map',    		
     );
@@ -471,10 +502,12 @@ class fields_types
     		'fieldtype_random_value',
     		'fieldtype_auto_increment',
     		'fieldtype_autostatus',
+    		'fieldtype_stages',
     		'fieldtype_todo_list',
     		'fieldtype_input_vpic',    		
     		'fieldtype_barcode',
     		'fieldtype_qrcode',
+    		'fieldtype_signature',
     );
     
     foreach($fieldtypes as $group=>$fields) 
@@ -524,7 +557,7 @@ class fields_types
     {
     	return '<a href="' . url_for('entities/user_roles','entities_id=' . $_GET['entities_id'] .  '&fields_id=' . $fields_id). '"><i class="fa fa-gear"></i>&nbsp;' . $name . '</a>';
     }
-    elseif(in_array($class, array('fieldtype_users_approve')))
+    elseif(in_array($class, array('fieldtype_users_approve','fieldtype_signature')))
     {
     	return '<a href="' . url_for('entities/fields_filters','entities_id=' . $_GET['entities_id'] .  '&fields_id=' . $fields_id). '"><i class="fa fa-gear"></i>&nbsp;' . $name . '</a>';
     }
@@ -675,6 +708,10 @@ class fields_types
 	      {
 	      	$html .= '<div id="fields_types_ajax_configuration_' . $v['name'] . '"></div>' . $v['html'];
 	      }
+	      elseif($v['type']=='html')
+	      {
+	      	$html .=  $v['html'];
+	      }
 	      else
 	      {      
 	        $html .= '
@@ -684,7 +721,7 @@ class fields_types
 	            (isset($v['tooltip_icon']) ? tooltip_icon($v['tooltip_icon']) : '') . $v['title'] . 
 	          '</label>
 	          <div class="col-md-9">' .	
-	        	   $field . 
+	        	   $field . 	        	   
 	             (isset($v['tooltip']) ? tooltip_text($v['tooltip']):'')  . '
 	          </div>			
 	        </div>
@@ -831,14 +868,18 @@ class fields_types
   	$fieldtype_mysql_query_force = true;
   	fieldtype_mysql_query::update_items_fields($current_entity_id, $item_id);
   	
+  	//dynamic date
+  	fieldtype_dynamic_date::update_items_fields($current_entity_id, $item_id);
+  	
   	//autoupdate time diff
   	fieldtype_days_difference::update_items_fields($current_entity_id, $item_id);
   	fieldtype_hours_difference::update_items_fields($current_entity_id, $item_id);
   	fieldtype_years_difference::update_items_fields($current_entity_id, $item_id);
   	fieldtype_months_difference::update_items_fields($current_entity_id, $item_id);
-  	
+  	  	  	
   	//maps
   	fieldtype_google_map::update_items_fields($current_entity_id, $item_id);
+  	fieldtype_google_map_directions::update_items_fields($current_entity_id, $item_id);
   	
   	//autoupdate static text pattern
   	fieldtype_text_pattern_static::set($current_entity_id, $item_id);

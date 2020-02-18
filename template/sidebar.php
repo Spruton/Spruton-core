@@ -37,6 +37,12 @@
 				</li>
         <li>
         
+        	<?php         	
+	        	if(is_ext_installed())
+	        	{
+	        		echo global_search::render('search-form-sidebar');
+	        	}
+        	?>
         </li>
 				
         <?php

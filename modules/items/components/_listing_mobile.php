@@ -11,7 +11,7 @@ while($item = db_fetch_array($items_query))
 {
 	$html .= '
 			<li>
-				<table style="width: 100%">
+				<table style="width: 100%" ' . (($users_notifications->has($item['id']) and $entity_cfg->get('disable_highlight_unread')!=1) ? 'class="unread-item-row"':''). '>
 			';
 	
 	
@@ -100,9 +100,9 @@ while($item = db_fetch_array($items_query))
 					
 				$value = '<a ' . $popup_html . ' class="item_heading_link" href="' . url_for('items/info', 'path=' . $path . '&redirect_to=subentity&gotopage[' . $_POST['reports_id'] . ']=' . $_POST['page']) . '">' . fields_types::output($output_options) . '</a>';
 					
-				if($entity_cfg['use_comments']==1 and $user_has_comments_access)
+				if($entity_cfg->get('use_comments')==1 and $user_has_comments_access and $entity_cfg->get('display_last_comment_in_listing',1))
 				{
-					$html .= comments::get_last_comment_info($current_entity_id,$item['id'],$path, $fields_access_schema);
+					$value .= comments::get_last_comment_info($current_entity_id,$item['id'],$path, $fields_access_schema);
 				}
 					
 				$value .= '</td>';

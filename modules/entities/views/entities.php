@@ -50,6 +50,7 @@
 						<li><?php echo link_to(TEXT_NAV_ENTITY_ACCESS,url_for('entities/access','entities_id=' . $v['id'])) ?></li>
 						<li><?php echo link_to(TEXT_NAV_FIELDS_ACCESS,url_for('entities/fields_access','entities_id=' . $v['id'])) ?></li>
 						<li><?php echo link_to(TEXT_NAV_ACCESS_RULES,url_for('access_rules/fields','entities_id=' . $v['id'])) ?></li>
+						<li><?php echo link_to(TEXT_RECORDS_VISIBILITY,url_for('records_visibility/rules','entities_id=' . $v['id'])) ?></li>
 					</ul>
 				</li>
 	      <li class="dropdown-submenu">

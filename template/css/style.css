@@ -299,10 +299,10 @@ Header and header elements.
 
 .header .search-form .form-control,
 .page-sidebar-menu .search-form .form-control {
-  -webkit-border-radius: 15px;
+  /*-webkit-border-radius: 15px;
      -moz-border-radius: 15px;
           border-radius: 15px;
-  padding-top: 3px;
+  padding-top: 3px;*/
 }
 
 .header .search-form .input-icon > i,

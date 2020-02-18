@@ -13,10 +13,10 @@ class forms_fields_rules
 			//check if there is limited access or field ID is 6 (user group)
 			if(isset($fields_access_schema[$v['fields_id']]) or ($v['fields_id']==6 and $app_module_path=='users/account'))
 			{
-				$html .= input_hidden_tag('fields[' . $v['fields_id']. ']',$item['field_' . $v['fields_id']]);
+				$html .= input_hidden_tag('fields[' . $v['fields_id']. ']',$item['field_' . $v['fields_id']],['class'=>'field_' . $v['fields_id']]);
 			}			
 		}
-				
+							
 		return $html;
 	}
 }

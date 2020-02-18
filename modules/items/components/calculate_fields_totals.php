@@ -43,6 +43,8 @@ while($totals = db_fetch_array($totals_query))
 	
 	foreach($totals as $k=>$v)
 	{
+		$v = (is_numeric($v) ? $v : 0);
+		
 		if(isset($totals_array[$k]))
 		{
 			$totals_array[$k]+=$v;

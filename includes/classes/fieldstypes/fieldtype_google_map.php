@@ -71,6 +71,7 @@ class fieldtype_google_map
   		if($is_google_map_script!=true)
   		{
   			$html .= '<script src="https://maps.googleapis.com/maps/api/js?key=' . $cfg->get('api_key') . '"></script>';
+  			$is_google_map_script = true;
   		}
   		
   		$field_id = $options['field']['id'];

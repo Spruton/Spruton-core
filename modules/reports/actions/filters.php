@@ -110,10 +110,15 @@ switch($app_module_action)
    	   	   	
    	switch($field_info['type'])
    	{
+   		case 'fieldtype_input': 
+   		case 'fieldtype_text_pattern_static':	
+   			$filters_condition = (isset($_POST['search_type_match']) ? 'search_type_match' : 'include');
+   			break;
    		case 'fieldtype_date_added':
 			case 'fieldtype_date_updated':
 			case 'fieldtype_input_date':
 			case 'fieldtype_input_datetime':
+			case 'fieldtype_dynamic_date':
 				$filters_condition = 'filter_by_days';
 				break;
    		default:

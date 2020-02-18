@@ -141,7 +141,9 @@ class fieldtype_text_pattern
                                   'item'=>$item,
                                   'is_export'=>true,                              
               										'is_print'=>true,
-                                  'path'=>$options['path']);
+              										'is_email' => (isset($options['is_email']) ? $options['is_email']:false),
+              										'hide_attachments_url' => (isset($options['hide_attachments_url']) ? $options['hide_attachments_url']:false),
+                                  'path'=>(isset($options['path']) ? $options['path']:''));
               
               //output full html if print option off
               if(isset($options['is_print']))
@@ -152,6 +154,8 @@ class fieldtype_text_pattern
               		unset($output_options['is_print']);
               	}
               }
+              
+              
                                                                                                                                                     
               if(in_array($field['type'],array('fieldtype_textarea_wysiwyg')))
               {
@@ -169,6 +173,19 @@ class fieldtype_text_pattern
               		{
               			$output = '<img src="' . url_for('dashboard/select2_ml_json','action=preview_image&form_type=' . $_GET['form_type'] . '&entity_id=' . $_GET['entity_id'] . '&field_id=' . $_GET['field_id'] . '&parent_entity_item_id=' . $_GET['parent_entity_item_id'] . '&file=' . urlencode(base64_encode($output_options['value'])))  .'">';
               		}
+              		elseif($options['is_email']==1)
+              		{
+              			$file = attachments::parse_filename($output_options['value']);
+              			
+              			if($options['hide_attachments_url']==1)
+              			{
+              				$output = $file['name'];
+              			}
+              			else
+              			{
+              				$output = link_to($file['name'],url_for('items/info','path=' . $entities_id . '&action=download_attachment&file=' . urlencode(base64_encode($output_options['value'])) . '&field=' . $output_options['field']['id']),array('target'=>'_blank'));
+              			}
+              		}
               		else 
               		{
               			$output = '<img src="' . url_for('items/info&path=' . $entities_id  ,'&action=download_attachment&preview=1&file=' . urlencode(base64_encode($output_options['value']))) .'">';
@@ -184,13 +201,30 @@ class fieldtype_text_pattern
               	$output = $value;
               }
               elseif(!isset($output_options['is_export']) and in_array($field['type'],array('fieldtype_attachments','fieldtype_input_file','fieldtype_image')))
-              {
+              {              	              	
               	$output = fields_types::output($output_options);
               }
               else
               {
                 $output = trim(strip_tags(fields_types::output($output_options)));
               }   
+              
+              //handle xml pattern
+              if(isset($options['is_xml']))
+              {
+              	if(in_array($field['type'],array('fieldtype_textarea_wysiwyg')))
+              	{
+              		$output = '<![CDATA[' . $output . ']]>';
+              	}
+              	elseif(in_array($field['type'],array('fieldtype_textarea')))
+              	{
+              		$output = '<![CDATA[' . str_replace(array('&lt;','&gt;'),array('<','>'),$output) .  ']]>';
+              	}
+              	else
+              	{
+              		$output = htmlspecialchars($output, ENT_XML1);
+              	}
+              }
               
               //echo '<br>' . $fields_id . ' ' . $output . ' ' . $matches[0][$matches_key];  
               
@@ -229,6 +263,12 @@ class fieldtype_text_pattern
   	$output_options['path'] = $path;
   	$output_options['custom_pattern'] = $text;
   	$output_options['is_print'] = (isset($options['is_print']) ? $options['is_print'] : true);
+  	
+  	$output_options['is_email'] = (isset($options['is_email']) ? $options['is_email'] : false);
+  	$output_options['hide_attachments_url'] = (isset($options['hide_attachments_url']) ? $options['hide_attachments_url'] : false);
+  
+  	
+  	if(isset($options['is_xml'])) $output_options['is_xml'] = $options['is_xml'];
   	
   	$text =  $this->output($output_options);
   	

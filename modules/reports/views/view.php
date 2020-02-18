@@ -143,7 +143,7 @@ if(strlen($with_selected_menu))
     </div>
   </div>
   <div class="col-sm-2">
-  	<?php echo ($reports_info['reports_type']!='common' and !isset($force_filters_reports_id) ? listing_types::render_switches($reports_info,$curren_listing_type):'') ?>
+  	<?php echo (($reports_info['reports_type']!='common' and !isset($force_filters_reports_id)) ? listing_types::render_switches($reports_info,$curren_listing_type):'') ?>
   </div>
   <div class="col-sm-5">
     <div class="entitly-listing-buttons-right">    
@@ -159,8 +159,8 @@ if(strlen($with_selected_menu))
 							</a>
 							<ul class="dropdown-menu pull-right">
 								<li>
-			            ' . link_to_modalbox('<i class="fa fa-sort-amount-asc"></i> ' . TEXT_HEADING_REPORTS_SORTING,url_for('reports/sorting','reports_id=' . $reports_info['id'] . '&redirect_to=listing' . (strlen($app_path)>0 ? '&path=' . $app_path : '') )). '
-			            ' . link_to_modalbox('<i class="fa fa-wrench"></i> ' . TEXT_NAV_LISTING_CONFIG,url_for('reports/configure','reports_id=' . $reports_info['id'] . '&redirect_to=listing'  . (strlen($app_path)>0 ? '&path=' . $app_path : '') )) . '
+			            ' . link_to_modalbox('<i class="fa fa-sort-amount-asc"></i> ' . TEXT_HEADING_REPORTS_SORTING,url_for('reports/sorting','reports_id=' . $reports_info['id'] . '&redirect_to=listing' . (isset($_GET['app_path'])>0 ? '&path=' . $app_path : '') )). '
+			            ' . link_to_modalbox('<i class="fa fa-wrench"></i> ' . TEXT_NAV_LISTING_CONFIG,url_for('reports/configure','reports_id=' . $reports_info['id'] . '&redirect_to=listing'  . (isset($_GET['app_path']) ? '&path=' . $app_path : '') )) . '
 			      		
 								</li>
 							</ul>

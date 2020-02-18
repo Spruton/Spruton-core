@@ -260,9 +260,12 @@
     global $$link;
     
     //remove slashes added by magic_quotes
-    if (get_magic_quotes_gpc()) 
+    if(!version_compare(phpversion(), '7.4', '>='))
     {
-    	$string = stripslashes($string);
+	    if (get_magic_quotes_gpc()) 
+	    {
+	    	$string = stripslashes($string);
+	    }
     }
                  
     if (function_exists('mysqli_real_escape_string')) 

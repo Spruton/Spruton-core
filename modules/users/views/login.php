@@ -41,11 +41,16 @@
 	<p><a href="<?php echo url_for('users/restore_password') ?>"><?php echo TEXT_PASSWORD_FORGOTTEN ?></a></p>
 </div>
 
+<?php if(strlen(CFG_LOGIN_DIGITAL_SIGNATURE_MODULE)): ?>
+<div class="create-account">
+	<p><a href="<?php echo url_for('users/signature_login') ?>"><?php echo TEXT_DIGITAL_SIGNATURE_LOGIN ?></a></p>
+</div>
+<?php endif ?>
+
+
 <?php if(CFG_LDAP_USE==1): ?>
 <div class="create-account">
-	<p>
-		 <a href="<?php echo url_for('users/ldap_login') ?>"><?php echo TEXT_MENU_LDAP_LOGIN ?></a>
-	</p>
+	<p><a href="<?php echo url_for('users/ldap_login') ?>"><?php echo TEXT_MENU_LDAP_LOGIN ?></a></p>
 </div>
 <?php endif ?>
 

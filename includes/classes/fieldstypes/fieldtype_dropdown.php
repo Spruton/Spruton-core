@@ -63,12 +63,12 @@ class fieldtype_dropdown
 //use global lists if exsit    
     if($cfg->get('use_global_list')>0)
     {
-      $choices = global_lists::get_choices($cfg->get('use_global_list'),(($field['is_required']==0 or strlen($cfg->get('default_text'))>0) ? true:false), $cfg->get('default_text'));
+      $choices = global_lists::get_choices($cfg->get('use_global_list'),(($field['is_required']==0 or strlen($cfg->get('default_text'))>0) ? true:false), $cfg->get('default_text'),$obj['field_' . $field['id']],true);
       $default_id = global_lists::get_choices_default_id($cfg->get('use_global_list'));
     }
     else
     {                    
-      $choices = fields_choices::get_choices($field['id'],(($field['is_required']==0 or strlen($cfg->get('default_text'))>0) ? true:false), $cfg->get('default_text'), $cfg->get('display_choices_values'));
+      $choices = fields_choices::get_choices($field['id'],(($field['is_required']==0 or strlen($cfg->get('default_text'))>0) ? true:false), $cfg->get('default_text'), $cfg->get('display_choices_values'),$obj['field_' . $field['id']],true);
       $default_id = fields_choices::get_default_id($field['id']); 
     }
     

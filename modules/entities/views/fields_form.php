@@ -212,7 +212,7 @@ function check_is_heading_option()
 {
    selected_type = $('#type').val()
    
-   if($.inArray(selected_type,["fieldtype_input_protected","fieldtype_google_map","fieldtype_mapbbcode","fieldtype_todo_list","fieldtype_mysql_query","fieldtype_image_map","fieldtype_mind_map","fieldtype_section","fieldtype_input_numeric_comments","fieldtype_input_url","fieldtype_attachments","fieldtype_input_file","fieldtype_image","fieldtype_textarea_wysiwyg","fieldtype_formula","fieldtype_related_records","fieldtype_boolean","fieldtype_boolean_checkbox"])==-1)
+   if($.inArray(selected_type,["fieldtype_iframe","fieldtype_input_protected","fieldtype_google_map","fieldtype_mapbbcode","fieldtype_todo_list","fieldtype_mysql_query","fieldtype_image_map","fieldtype_mind_map","fieldtype_section","fieldtype_input_numeric_comments","fieldtype_input_url","fieldtype_attachments","fieldtype_input_file","fieldtype_image","fieldtype_textarea_wysiwyg","fieldtype_formula","fieldtype_related_records","fieldtype_boolean","fieldtype_boolean_checkbox"])==-1)
    {
      $('#is-heading-container').show() 
    }

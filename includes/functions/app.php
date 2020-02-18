@@ -654,26 +654,35 @@ function app_send_new_comment_notification($comments_id,$item_id,$entity_id)
   //print_r($send_to);
   //exit();
   
-  //send to suers who made comments and not assigned to item
-  $comments_query = db_query("select * from app_comments where entities_id='" . db_input($entity_id) . "' and items_id='" . db_input($item_id) . "'" . (count($send_to) ? " and created_by not in (" . implode(',',$send_to). ")":''));
-  while($comments = db_fetch_array($comments_query))
+  $cfg = new entities_cfg($entity_id);
+  
+  //check flag send notification to assinged flag
+  if($cfg->get('send_notification_to_assigned',0)==0)
   {
-    if(!in_array($comments['created_by'],$send_to))
-    {
-    	//check if user has access to item    	
-    	if(users::has_access_to_entity($entity_id,'view_assigned',$app_users_cache[$comments['created_by']]['group_id']))
-    	{
-    		if(!in_array($comments['created_by'],$send_to)) continue;	
-    	}
-    	elseif(users::has_access_to_entity($entity_id,'view',$app_users_cache[$comments['created_by']]['group_id']))
-    	{
-    		$send_to[] = $comments['created_by'];
-    	}      
-    }
+	  //send to suers who made comments and not assigned to item
+	  $comments_query = db_query("select * from app_comments where entities_id='" . db_input($entity_id) . "' and items_id='" . db_input($item_id) . "'" . (count($send_to) ? " and created_by not in (" . implode(',',$send_to). ")":''));
+	  while($comments = db_fetch_array($comments_query))
+	  {
+	    if(!in_array($comments['created_by'],$send_to))
+	    {
+	    	//check if user has access to item    	
+	    	if(users::has_access_to_entity($entity_id,'view_assigned',$app_users_cache[$comments['created_by']]['group_id']))
+	    	{
+	    		if(!in_array($comments['created_by'],$send_to)) continue;	
+	    	}
+	    	elseif(users::has_access_to_entity($entity_id,'view',$app_users_cache[$comments['created_by']]['group_id']))
+	    	{
+	    		$send_to[] = $comments['created_by'];
+	    	}      
+	    }
+	  }
   }
   
   //add item created user to notification
-  $send_to[] = $item['created_by'];
+  if(fieldtype_created_by::is_notification_enabled($entity_id))
+  {
+  	$send_to[] = $item['created_by'];
+  }
   
   $send_to = array_unique($send_to);
   
@@ -1267,6 +1276,25 @@ function app_button_color_css($color,$css_class = '')
 	}
 
 	return $css;
+}
+
+function app_include_codemirror($modes = [])
+{
+	$html = '
+			<script src="js/codemirror/lib/codemirror.js"></script>
+			<link rel="stylesheet" href="js/codemirror/lib/codemirror.css">
+			';
+	foreach($modes as $mode)
+	{
+		$html .= '<script src="js/codemirror/mode/' . $mode . '/' . $mode. '.js"></script>';
+	}
+	
+	return $html;
+}
+
+function app_get_boolean_choices()
+{
+	return array('1'=>TEXT_YES,'0'=>TEXT_NO);
 }
 
 

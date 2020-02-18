@@ -131,11 +131,13 @@ class listing_types
 		{
 			$choices[] = $info['type'];
 		}
+				
 						
 		$html = '';
 		
 		if(count($choices)>1)
 		{
+			
 			$html .= '<ul class="list-inline listing-types-switches">';
 						
 			foreach($choices as $type)
@@ -166,7 +168,8 @@ class listing_types
 				$html .= '<li><a href="' . $url . '" class="btn btn-xs btn-default ' . ($listing_type==$type ? 'active':''). '">' . $icon . '</a></li>';
 			}
 			
-			$html .= '</ul>';					
+			$html .= '</ul>';
+						
 		}
 		
 		return $html;

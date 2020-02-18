@@ -30,7 +30,12 @@
 
 <script>
   $(function() { 
-    $('#forms_form').validate();                                                                      
+    $('#forms_form').validate({
+    	submitHandler: function(form){
+				app_prepare_modal_action_loading(form)
+				return true;
+			}
+    });                                                                      
   });
   
 </script>   

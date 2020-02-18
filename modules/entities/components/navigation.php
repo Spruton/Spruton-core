@@ -85,6 +85,9 @@
 					<li>
 						<?php echo link_to(TEXT_NAV_ACCESS_RULES,url_for('access_rules/fields','entities_id=' . $_GET['entities_id'])) ?>
 					</li>
+					<li>
+						<?php echo link_to(TEXT_RECORDS_VISIBILITY,url_for('records_visibility/rules','entities_id=' . $_GET['entities_id'])) ?>
+					</li>
 				</ul>
 			</li>
       <li class="dropdown">

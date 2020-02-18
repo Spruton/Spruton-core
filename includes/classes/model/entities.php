@@ -247,9 +247,9 @@ class entities
     
   public static function get_name_by_id($id)
   {
-    $obj = db_find('app_entities',$id);
-    
-    return $obj['name'];
+  	global $app_entities_cache;
+  	
+  	return (isset($app_entities_cache[$id]) ? $app_entities_cache[$id]['name'] : '');  	    
   }
   
   public static function get_name_cache()
@@ -274,11 +274,11 @@ class entities
   }
   
   
-  public static function get_choices()
+  public static function get_choices($add_id_to_name = false)
   {
     $choices = array();
     
-    foreach(entities::get_tree() as $v)
+    foreach(entities::get_tree(0,[],0,[],[],$add_id_to_name) as $v)
     {
       $choices[$v['id']] = str_repeat('- ', $v['level']) . $v['name'];
     }
@@ -287,7 +287,7 @@ class entities
   }
   
   
-  public static function get_tree($parent_id=0,$tree=array(),$level=0,$path = array(), $skip = array())
+  public static function get_tree($parent_id=0,$tree=array(),$level=0,$path = array(), $skip = array(), $add_id_to_name = false)
   {
     global $app_user;
       
@@ -305,7 +305,7 @@ class entities
     	if(in_array($entities['id'],$skip)) continue;
     	
       $tree[] = array('id'=>$entities['id'],
-                      'name'=>$entities['name'],
+                      'name'=>$entities['name'] .  ($add_id_to_name ? ' [#' . $entities['id'] . ']':''),
       								'notes'=>$entities['notes'],	
                       'sort_order'=>$entities['sort_order'],  
                       'level'=>$level,
@@ -404,6 +404,7 @@ class entities
   		case 'fieldtype_input_numeric_comments':
   		case 'fieldtype_auto_increment':  		
   		case 'fieldtype_phone':
+  		case 'fieldtype_signature':
   			$db_type = 'VARCHAR(64)';
   			break; 
   		case 'fieldtype_google_map':
@@ -422,17 +423,21 @@ class entities
   			break;
   		case 'fieldtype_input_date':
   		case 'fieldtype_input_datetime':
-  		case 'fieldtype_dropdown':
+  		case 'fieldtype_dropdown':  		
   		case 'fieldtype_radioboxes':
   		case 'fieldtype_progress':
   		case 'fieldtype_image_map':
-  		case 'fieldtype_entity_multilevel':	
+  		case 'fieldtype_entity_multilevel':
+  		case 'fieldtype_dynamic_date':
+  		case 'fieldtype_stages':
+  		case 'fieldtype_autostatus':
   			$db_type = 'INT(11)';
   			break;
   		case 'fieldtype_input_vpic':
   		case 'fieldtype_barcode':
   		case 'fieldtype_image':
   		case 'fieldtype_input_file':
+  		case 'fieldtype_dropdown_multilevel':
   			$db_type = 'VARCHAR(255)';
   			break;
   		case 'fieldtype_text_pattern':	
@@ -456,7 +461,43 @@ class entities
   	$db_type = self::prepare_field_type($type);
     $sql = 'ALTER TABLE  app_entity_' . (int)$entities_id . ' ADD  field_' . (int)$fields_id . ' ' . $db_type . ' NOT NULL';
     db_query($sql);
-  }     
+    
+    //add index
+    entities::prepare_field_index($entities_id, $fields_id, $type);
+    
+  }   
+  
+  public static function prepare_field_index($entities_id,$fields_id,$type)
+  {
+  	if(in_array($type,[
+  			'fieldtype_dropdown',
+  			'fieldtype_radioboxes',
+  			'fieldtype_progress',
+  			'fieldtype_stages',
+  			'fieldtype_entity',
+  			'fieldtype_entity_ajax',
+  			'fieldtype_entity_multilevel',
+  			'fieldtype_access_group',
+  			'fieldtype_users',
+  			'fieldtype_users_approve',
+  			'fieldtype_user_roles',
+  			'fieldtype_tags',
+  			'fieldtype_dropdown_multiple',
+  			'fieldtype_dropdown_multilevel',
+  			'fieldtype_checkboxes',
+  			'fieldtype_autostatus',
+  	]))
+  	{
+  		if(entities::prepare_field_type($type)=='TEXT')
+  		{
+  			db_query("ALTER TABLE app_entity_" . (int)$entities_id . " ADD INDEX idx_field_" . (int)$fields_id . " (field_" . (int)$fields_id . "(255));");
+  		}
+  		else
+  		{
+  			db_query("ALTER TABLE app_entity_" . (int)$entities_id . " ADD INDEX idx_field_" . (int)$fields_id . " (field_" . (int)$fields_id . ");");
+  		}
+  	}
+  }
   
   public static function delete_field($entities_id,$fields_id)
   {

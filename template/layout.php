@@ -15,7 +15,7 @@
 
 <!-- BEGIN GLOBAL MANDATORY STYLES -->
 <link href="template/plugins/font-awesome/css/font-awesome.min.css?v=4.7.0" rel="stylesheet" type="text/css"/>
-<link href="template/plugins/line-awesome/css/line-awesome-font-awesome.min.css?v=1.1.0" rel="stylesheet" type="text/css"/>
+<link href="template/plugins/line-awesome/css/line-awesome.min.css?v=1.3.0" rel="stylesheet" type="text/css"/>
 <link href="template/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
 <link href="template/plugins/uniform/css/uniform.default.css" rel="stylesheet" type="text/css"/>
 <!-- END GLOBAL MANDATORY STYLES -->
@@ -28,8 +28,8 @@
 <!-- END PAGE LEVEL SCRIPTS -->
 <!-- BEGIN THEME STYLES -->
 <link href="template/css/style-conquer.css?v=2" rel="stylesheet" type="text/css"/>
-<link href="template/css/style.css?v=2" rel="stylesheet" type="text/css"/>
-<link href="template/css/style-responsive.css?v=2" rel="stylesheet" type="text/css"/>
+<link href="template/css/style.css?v=<?php echo PROJECT_VERSION ?>" rel="stylesheet" type="text/css"/>
+<link href="template/css/style-responsive.css?v=<?php echo PROJECT_VERSION ?>" rel="stylesheet" type="text/css"/>
 <link href="template/css/plugins.css?v=<?php echo PROJECT_VERSION ?>" rel="stylesheet" type="text/css"/>
 <link rel="stylesheet" type="text/css" href="template/plugins/bootstrap-colorpicker/css/colorpicker.css"/>
 <link rel="stylesheet" type="text/css" href="js/simple-color-picker/colorPicker.css"/>
@@ -39,10 +39,11 @@
 <link rel="stylesheet" type="text/css" media="screen" href="template/plugins/ckeditor/plugins/codesnippet/lib/highlight/styles/default.css" />
 <link rel="stylesheet" type="text/css" href="js/DataTables-1.10.15/media/css/dataTables.bootstrap.css" />
 <link rel="stylesheet" type="text/css" href="js/select2/dist/css/select2.min.css" />
+<link rel="stylesheet" type="text/css" href="js/multistep-indicator-master/css/style.css" />
 
 <?php require('js/mapbbcode-master/includes.css.php'); ?>
 
-<link href="css/skins/<?php echo $app_skin ?>" rel="stylesheet" type="text/css" />
+<link href="css/skins/<?php echo $app_skin . '?v=' . PROJECT_VERSION ?>" rel="stylesheet" type="text/css" />
 
 <script src="template/plugins/jquery-1.10.2.min.js" type="text/javascript"></script>   
 

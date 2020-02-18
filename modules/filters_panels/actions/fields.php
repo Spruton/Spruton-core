@@ -13,7 +13,8 @@ switch($app_module_action)
 			'fields_id'=>$_POST['fields_id'],
 			'width'=>(isset($_POST['width']) ? $_POST['width']:''),
 			'exclude_values'=>(isset($_POST['exclude_values']) ? implode(',',$_POST['exclude_values']):''),
-			'display_type'=>(isset($_POST['display_type']) ? $_POST['display_type']:''),	
+			'display_type'=>(isset($_POST['display_type']) ? $_POST['display_type']:''),
+			'search_type_match'=>(isset($_POST['search_type_match']) ? $_POST['search_type_match']:''),
 			'height'=>(isset($_POST['height']) ? $_POST['height']:''),
 			
 		);
@@ -72,9 +73,15 @@ switch($app_module_action)
 		//include input fields
 		$types_for_filters_list .= "," . fields_types::get_types_for_search_list();
 		
+		//include parent item id
+		if($app_entities_cache[$entities_id]['parent_id']>0)
+		{
+			$types_for_filters_list .= ",'fieldtype_parent_item_id'";
+		}
+		
 		$choices = array();
 		$choices[''] = '';
-		$where_sql = " and f.id not in (select fields_id from app_filters_panels_fields where entities_id={$entities_id} " . (isset($_GET['id']) ? " and id!=" . $_GET['id'] : "") . ")";
+		$where_sql = " and f.id not in (select fields_id from app_filters_panels_fields where panels_id={$panels_id} and entities_id={$entities_id} " . (isset($_GET['id']) ? " and id!=" . $_GET['id'] : "") . ")";
 		$fields_query = db_query("select f.*, t.name as tab_name, if(f.type in ('fieldtype_id','fieldtype_date_added','fieldtype_date_updated','fieldtype_created_by'),-1,t.sort_order) as tab_sort_order from app_fields f, app_forms_tabs t where f.type in (" . $types_for_filters_list . ") {$where_sql} and f.entities_id='" . db_input($entities_id) . "' and f.forms_tabs_id=t.id order by tab_sort_order, t.name, f.sort_order, f.name");
 		while($fields = db_fetch_array($fields_query))
 		{
@@ -124,7 +131,8 @@ switch($app_module_action)
 			'fieldtype_dropdown_multiple',
 			'fieldtype_dropdown_multilevel',
 			'fieldtype_grouped_users',
-			'fieldtype_tags',				
+			'fieldtype_tags',	
+			'fieldtype_stages',
 		)))
 		{
 			$cfg = new fields_types_cfg($field_info['configuration']);
@@ -157,6 +165,7 @@ switch($app_module_action)
 				'fieldtype_user_roles',
 				'fieldtype_entity_ajax',
 				'fieldtype_tags',
+				'fieldtype_stages',
 				'fieldtype_created_by',
 				'fieldtype_user_status',
 				'fieldtype_user_accessgroups',
@@ -167,7 +176,9 @@ switch($app_module_action)
 				'fieldtype_dropdown_multiple',
 				'fieldtype_entity',
 				'fieldtype_users',				
-				'fieldtype_dropdown_multilevel',				
+				'fieldtype_dropdown_multilevel',
+				'fieldtype_parent_item_id',
+				'fieldtype_access_group',
 		)))
 		{
 			$choices['dropdown'] = TEXT_FIELDTYPE_DROPDOWN_TITLE;
@@ -203,6 +214,24 @@ switch($app_module_action)
 				  </div>
 				 ';
 			}
+		}
+		
+		if(in_array($field_info['type'],['fieldtype_input','fieldtype_text_pattern_static']))
+		{
+			$html .= '
+				<div class="form-group">
+				<label class="col-md-3 control-label" for="search_type_match">' . TEXT_SEARCH . '</label>
+			    <div class="col-md-9">			  	  
+			  	  <p class="form-control-static">' . input_checkbox_tag('search_type_match',1,['checked'=>$obj['search_type_match']]) . ' ' . TEXT_SEARCH_TYPE_MATCH  . '</p>
+			    </div>
+			  </div>
+			  <div class="form-group">
+				<label class="col-md-3 control-label" for="width">' . TEXT_WIDHT . '</label>
+			    <div class="col-md-9">	
+			  	  ' . select_tag('width',filters_panels::get_field_width_choices(),$obj['width'],array('class'=>'form-control input-medium')) . '
+			    </div>			
+			  </div>
+			 ';
 		}
 		
 		echo $html;

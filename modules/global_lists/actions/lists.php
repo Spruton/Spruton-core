@@ -3,7 +3,10 @@
 switch($app_module_action)
 {
   case 'save':
-      $sql_data = array('name'=>$_POST['name']);
+      $sql_data = array(
+      	'name'=>$_POST['name'],
+      	'notes'=>$_POST['notes']
+      );
                                                                               
       if(isset($_GET['id']))
       {        

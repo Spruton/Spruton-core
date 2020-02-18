@@ -9,6 +9,13 @@
 		</a>
 		<!-- END LOGO -->
 		
+		<?php 
+			if(is_ext_installed())
+			{
+				echo global_search::render();		
+			}		 		
+		?>
+		
 		<!-- BEGIN RESPONSIVE MENU TOGGLER -->
 		<a href="javascript:;" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 		<img src="template/img/menu-toggler.png" alt=""/>

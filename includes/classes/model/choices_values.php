@@ -12,7 +12,7 @@ class choices_values
   {
     $this->entities_id = $entities_id;
     
-    $this->use_for_fieldtypes = array('fieldtype_users_approve','fieldtype_user_roles','fieldtype_entity_ajax','fieldtype_tags','fieldtype_dropdown','fieldtype_radioboxes','fieldtype_grouped_users','fieldtype_checkboxes','fieldtype_dropdown_multiple','fieldtype_entity','fieldtype_users','fieldtype_dropdown_multilevel');
+    $this->use_for_fieldtypes = array('fieldtype_access_group','fieldtype_users_approve','fieldtype_user_roles','fieldtype_entity_ajax','fieldtype_tags','fieldtype_dropdown','fieldtype_radioboxes','fieldtype_grouped_users','fieldtype_checkboxes','fieldtype_dropdown_multiple','fieldtype_entity','fieldtype_users','fieldtype_dropdown_multilevel');
     
     $this->choices_values_list = array();
   }

@@ -70,7 +70,7 @@ class dashboard_pages
 					
 					$count_fields = 0;
 					
-					$fields_query = db_query("select id, type, name, configuration from app_fields where id in (" . $pages['users_fields'] . ") order by field(id," . $pages['users_fields'] . ")");				
+					$fields_query = db_query("select id, type, name, configuration, entities_id from app_fields where id in (" . $pages['users_fields'] . ") order by field(id," . $pages['users_fields'] . ")");				
 					while($field = db_fetch_array($fields_query))
 					{
 						//prepare field value

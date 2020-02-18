@@ -22,6 +22,7 @@
     case 'logoff':
         app_session_unregister('app_logged_users_id');
         app_session_unregister('app_current_version');
+        app_session_unregister('two_step_verification_info');
         
         setcookie('app_stay_logged','',time() - 3600,'/');
         setcookie('app_remember_user','',time() - 3600,'/'); 

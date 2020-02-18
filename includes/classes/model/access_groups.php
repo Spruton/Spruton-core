@@ -127,16 +127,39 @@ class access_groups
   
   public static function get_name_by_id($id)
   {
+  	global $app_access_groups_cache;
+  	
     if($id==0)
     {
       return TEXT_ADMINISTRATOR;
     }
     else
     {
-      $obj = db_find('app_access_groups',$id);
-      
-      return $obj['name'];
+    	if(isset($app_access_groups_cache[$id]))
+    	{
+    		return $app_access_groups_cache[$id];
+    	}
+    	else 
+    	{
+    		return '';
+    	}      
     }
+  }
+  
+  static function get_name_by_id_list($list)
+  {
+  	  	
+  	if(!is_array($list)) $list = explode(',',$list);
+  	
+  	$users_groups = [];
+  	
+  	foreach($list as $id)
+  	{
+  		$users_groups[] = self::get_name_by_id($id);
+  	}
+  	
+  	return $users_groups;
+  	
   }
   
   public static function check_before_delete($id)
@@ -173,7 +196,8 @@ class access_groups
   {
     $cache = array();
     
-    $cache[0] = TEXT_ADMINISTRATOR;
+    if(defined('TEXT_ADMINISTRATOR'))
+    	$cache[0] = TEXT_ADMINISTRATOR;
     
     $groups_query = db_fetch_all('app_access_groups','','sort_order, name');
     while($v = db_fetch_array($groups_query))

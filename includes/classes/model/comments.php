@@ -34,6 +34,7 @@ class comments
 				'fieldtype_entity',				
 				'fieldtype_entity_ajax',
 				'fieldtype_tags',
+				'fieldtype_stages',
 		);
 	}
   public static function get_last_comment_info($entities_id, $items_id,$path, $fields_access_schema)

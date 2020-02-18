@@ -172,6 +172,21 @@ switch($field_info['type'])
 
       
     break;
+  case 'fieldtype_access_group':  	  	  	
+  	$choices = fieldtype_access_group::get_choices($field_info);
+  	
+  	$attributes = array('class'=>'form-control chosen-select',
+  			'multiple'=>'multiple',
+  			'data-placeholder'=>TEXT_SELECT_SOME_VALUES);
+  	
+  	$html = $condition_html .
+  	'<div class="form-group" id="filter-by-values">
+        	<label class="col-md-3 control-label" for="values">' . TEXT_FILTER_BY_VALUES. '</label>
+          <div class="col-md-9">
+        	  ' . select_tag('values[]',$choices,$filter_info['filters_values'],$attributes) . '
+          </div>
+        </div>';
+  	break;
   case 'fieldtype_image_map':  
   case 'fieldtype_autostatus':
   case 'fieldtype_checkboxes':
@@ -181,6 +196,7 @@ switch($field_info['type'])
   case 'fieldtype_dropdown_multilevel':
   case 'fieldtype_grouped_users':
   case 'fieldtype_tags':
+  case 'fieldtype_stages':
       
       $cfg = new fields_types_cfg($field_info['configuration']);
     
@@ -343,6 +359,7 @@ switch($field_info['type'])
   case 'fieldtype_date_updated':
   case 'fieldtype_input_date':
   case 'fieldtype_input_datetime':
+  case 'fieldtype_dynamic_date':
   
       //own conditions for date fields
       $condition_array = array(

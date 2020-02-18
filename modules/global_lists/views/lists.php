@@ -10,7 +10,8 @@
   <tr>
     <th><?php echo TEXT_ACTION ?></th>    
     <th><?php echo TEXT_ID ?></th>
-    <th width="100%"><?php echo TEXT_NAME ?></th>        
+    <th width="100%"><?php echo TEXT_NAME ?></th>
+    <th><?php echo TEXT_NOTE ?></th>        
   </tr>
 </thead>
 <tbody>
@@ -22,7 +23,8 @@
   <tr>
     <td style="white-space: nowrap;"><?php echo button_icon_delete(url_for('global_lists/lists_delete','id=' . $v['id'])) . ' ' . button_icon_edit(url_for('global_lists/lists_form','id=' . $v['id'])) ?></td>
     <td><?php echo $v['id'] ?></td>    
-    <td><?php echo link_to('<i class="fa fa-list"></i> ' . $v['name'],url_for('global_lists/choices','lists_id=' . $v['id'])) ?></td>    
+    <td><?php echo link_to('<i class="fa fa-list"></i> ' . $v['name'],url_for('global_lists/choices','lists_id=' . $v['id'])) ?></td>
+    <td><?php echo tooltip_icon($v['notes'],'left') ?></td>    
   </tr>
 <?php endwhile?>  
 </tbody>

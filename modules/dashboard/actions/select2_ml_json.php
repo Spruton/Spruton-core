@@ -244,6 +244,69 @@ switch($app_module_action)
 							  })								
 								' . "\n";
 						break;
+					case 'fieldtype_boolean_checkbox':
+						if($item_value=='true')
+						{
+							$js .= '
+									$("#fields_' . $value['to'] . '").attr("checked",true)
+						    	$("#uniform-"+$("#fields_' . $value['to'] . '").attr("id")+" span").addClass("checked")
+								';
+						}
+						else
+						{
+							$js .= '
+									$("#fields_' . $value['to'] . '").attr("checked",false)
+						    	$("#uniform-"+$("#fields_' . $value['to'] . '").attr("id")+" span").removeClass("checked")
+								';
+						}
+						break;
+					case 'fieldtype_textarea':
+					case 'fieldtype_todo_list':
+					case 'fieldtype_mapbbcode':
+						$js .= '
+							var value_' . $value['to'] . '=`' . addslashes($item_value) . '`;
+							$("#fields_' . $value['to'] . '").val(value_' . $value['to'] . ')' . "\n";
+						break;
+					case 'fieldtype_textarea_wysiwyg':
+						$js .= '
+								var value_' . $value['to'] . '=`' . addslashes($item_value) . '`;
+								$("#fields_' . $value['to'] . '").val(value_' . $value['to'] . ');
+								CKEDITOR.instances.fields_' . $value['to'] . '.setData(value_' . $value['to'] . ');
+								' . "\n";
+						break;
+					case 'fieldtype_entity_ajax':
+							
+						if(strlen($item_value))
+						{
+							$field_info = db_find('app_fields',$value['to']);
+							$field_info_cfg =  new fields_types_cfg($field_info['configuration']);
+								
+							$entity_info = db_find('app_entities',$field_info_cfg->get('entity_id'));
+							$field_entity_info = db_find('app_entities',$field_info['entities_id']);
+								
+								
+							$js .= '$("#fields_' . $value['to'] . '").empty();' . "\n";
+								
+							$selected = [];
+							$entity_item_query = db_query("select  e.* from app_entity_" . $field_info_cfg->get('entity_id') . " e  where id in (" . $item_value. ")", false);
+							while($entity_item = db_fetch_array($entity_item_query))
+							{
+								$heading = fieldtype_entity_ajax::render_heading_template($entity_item, $entity_info, $field_entity_info, $field_info_cfg,false);
+								//echo $entity_item['id'] . '-' . $heading['text'];
+					
+								$js .= '$("#fields_' . $value['to'] . '").append($("<option></option>").attr("value",' . $entity_item['id'] . ').text("' . addslashes($heading['text']). '"));' . "\n";
+					
+								$selected[] = $entity_item['id'];
+							}
+								
+							$js .= '$("#fields_' . $value['to'] . '").val([' . implode(',',$selected) .  ']).trigger("change");'. "\n";
+						}
+						else
+						{
+							$js .= '$("#fields_' . $value['to'] . '").empty().val("").trigger("change");' . "\n";
+						}
+					
+						break;
 					default:
 						$js .= '$("#fields_' . $value['to'] . '").val("' . addslashes($item_value). '").trigger("chosen:updated");' . "\n";
 						break;

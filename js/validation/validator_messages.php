@@ -10,4 +10,6 @@
   jQuery.validator.addMethod("email", function(value, element) {
   	return this.optional( element ) || /^[a-zA-Zа-яА-Я0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Zа-яА-Я0-9](?:[a-zA-Zа-яА-Я0-9-]{0,61}[a-zA-Zа-яА-Я0-9])?(?:\.[a-zA-Zа-яА-Я0-9](?:[a-zA-Zа-яА-Я0-9-]{0,61}[a-zA-Zа-яА-Я0-9])?)*$/.test( value );
   }, "<?php echo addslashes(TEXT_ERROR_REQUIRED_EMAIL) ?>");
+
+  jQuery.validator.addMethod('accept', function () { return true; });
 </script>

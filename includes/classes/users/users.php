@@ -288,27 +288,51 @@ class users
     return $content;
   }
   
-  static public function send_to($send_to,$subject,$body)
+  static public function send_to($send_to,$subject,$body,$attachments = [])
   {
     global $app_user, $app_users_cache;
            
     foreach($send_to as $users_id)
     {
-      if(CFG_EMAIL_COPY_SENDER==0 and $users_id==$app_user['id']) continue;
-                  
-      $users_info_query = db_query("select * from app_entity_1 where id='" . db_input($users_id) . "' and field_5=1");
-      if($users_info = db_fetch_array($users_info_query) and isset($app_user['email']))
-      {
-        $options = array('to'       =>$users_info['field_9'],
-                         'to_name'  =>$app_users_cache[$users_info['id']]['name'],
-                         'subject'  =>$subject,
-                         'body'     =>$body,
-                         'from'     =>$app_user['email'],
-                         'from_name'=>$app_user['name']);
-         
-                
-        users::send_email($options);
-      }      
+    	if(strstr($users_id,'@'))
+    	{
+    		if(app_validate_email($users_id))
+    		{
+    			$options = array(
+    					'to'       =>$users_id,
+    					'to_name'  =>'',
+    					'subject'  =>$subject,
+    					'body'     =>$body,
+    					'from'     =>$app_user['email'],
+    					'from_name' => $app_user['name'],
+    					'attachments' => $attachments,
+    			);
+    			    			 
+    			users::send_email($options);
+    		}    		
+    	}	
+    	else
+    	{
+	      if(CFG_EMAIL_COPY_SENDER==0 and $users_id==$app_user['id']) continue;
+	                  
+	      $users_info_query = db_query("select * from app_entity_1 where id='" . db_input($users_id) . "' and field_5=1");
+	      if($users_info = db_fetch_array($users_info_query) and isset($app_user['email']))
+	      {
+	        $options = array(
+	        		'to'       =>$users_info['field_9'],
+	            'to_name'  =>$app_users_cache[$users_info['id']]['name'],
+	            'subject'  =>$subject,
+	            'body'     =>$body,
+	            'from'     =>$app_user['email'],
+	            'from_name' => $app_user['name'],
+	        		'attachments' => $attachments, 				        		
+	        );
+	         
+	                
+	        users::send_email($options);
+	      } 
+    	}
+    	
     }
   }   
   
@@ -390,11 +414,11 @@ class users
 	    
 	    $mail->WordWrap = 50;                                 // Set word wrap to 50 characters
 	    if(isset($options['attachments']))
-	    {  
+	    {  	 	    		    	
 	      foreach($options['attachments'] as $filename=>$name)
-	      {  
+	      {  	      		      	
 	      	if(is_file($filename))
-	      	{
+	      	{	      		
 	        	$mail->addAttachment($filename, $name);
 	      	}
 	      }
@@ -654,7 +678,14 @@ class users
 	    	{
 	      	$grouped_users_fields[] = $fields['id'];
 	    	}
-	    }                 
+	    }  
+	    
+	    $access_group_fields = array();
+	    $fields_query = db_query("select f.id from app_fields f where f.type in ('fieldtype_access_group') and  f.entities_id='" . db_input($entities_id) . "'");
+	    while($fields = db_fetch_array($fields_query))
+	    {
+	    	$access_group_fields[] = $fields['id'];
+	    }
       
 	    $sql_query_array = array();
 	    
@@ -674,6 +705,12 @@ class users
       foreach($grouped_global_users_fields as $list_id=>$id)
       {
       	$sql_query_array[] = "(select count(*) as total from app_entity_" .$entities_id . "_values cv where cv.items_id=e.id and cv.fields_id='" . $id . "' and cv.value in (select id from app_global_lists_choices fc where fc.lists_id='" . $list_id . "' and find_in_set(" . $app_user['id']  . ",fc.users)))>0";
+      }
+      
+      //check access group fields
+      foreach($access_group_fields as $id)
+      {
+      	$sql_query_array[] = "(select count(*) as total from app_entity_" .$entities_id . "_values cv where cv.items_id=e.id and cv.fields_id='" . $id . "' and cv.value='" . $app_user['group_id'] . "')>0";
       }
       
       //check created by
@@ -782,7 +819,10 @@ class users
            app_session_register('app_logged_users_id',$user['id']);
            
            //login log
-           users_login_log::success($username, $user['id']);
+           if(CFG_2STEP_VERIFICATION_ENABLED!=1)
+           {
+           	 users_login_log::success($username, $user['id']);
+           }
            
             if($remember_me==1) 
             { 
@@ -801,7 +841,7 @@ class users
             
             if(isset($_COOKIE['app_login_redirect_to']))
             {
-              setcookie('app_login_redirect_to','',time() - 3600,'/');
+              //setcookie('app_login_redirect_to','',time() - 3600,'/');
               redirect_to(str_replace('module=','',$_COOKIE['app_login_redirect_to']));
             }
             else

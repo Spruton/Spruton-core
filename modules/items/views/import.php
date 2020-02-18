@@ -29,12 +29,31 @@
   <div class="form-group">
   	<label class="col-md-3 control-label" for="name"><?php echo TEXT_FILENAME ?></label>
     <div class="col-md-9">	
-  	  <?php echo input_file_tag('filename',array('class'=>'form-control required', 'accept'=>fieldtype_attachments::get_accept_types_by_extensions('xls,xlsx'))) ?>
+  	  <?php echo input_file_tag('filename',array('class'=>'form-control required input-xlarge', 'accept'=>fieldtype_attachments::get_accept_types_by_extensions('xls,xlsx'))) ?>
       <span class="help-block">*.xls, *.xlsx</span>      
     </div>			
   </div>  
   
 <?php 
+	if(entities::has_subentities($current_entity_id)) {
+		
+  $choices = [];
+  $choices[] = '';
+  foreach(entities::get_tree($current_entity_id) as $entity)
+  {
+  	$choices[$entity['id']] = str_repeat(' - ', ($entity['level']+1)) . $entity['name'];
+  }
+?>  
+
+	<div class="form-group">
+  	<label class="col-md-3 control-label" for="entities_id"><?php echo tooltip_icon(TEXT_MULTI_LEVEL_IMPORT_INFO) . TEXT_MULTI_LEVEL_IMPORT ?></label>
+    <div class="col-md-9">	
+  	  <?php echo select_tag('multilevel_import',$choices,'',array('class'=>'form-control input-xlarge')) ?>
+    </div>			
+  </div>
+  
+<?php 
+	}
 	if(is_ext_installed())
 	{
 		$choices = import_templates::get_choices($current_entity_id);
@@ -64,7 +83,12 @@
 
 <script>
   $(function() { 
-    $('#import_data').validate(); 
+    $('#import_data').validate({
+	    	submitHandler: function(form){
+					app_prepare_modal_action_loading(form)
+					return true;
+				}
+      }); 
                                                                     
   });
   

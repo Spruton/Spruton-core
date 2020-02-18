@@ -25,14 +25,22 @@
       
       submitHandler: function(form)
       {    
-        
+
+      	$('.btn-primary-modal-action',form).prop('disabled',true);
+      	
         //include barcode handler
         <?php require(component_path('items/items_form_barcode.js')); ?>
+
+        //include custom js code in submit handler
+        <?php echo (strlen(trim($entity_cfg->get('javascript_onsubmit'))) ? $entity_cfg->get('javascript_onsubmit') :'') ?>
               	
         //stop submit form during unique fields checking
         if($("#"+form.name+" .is-unique-checking").length>0)
         {
           $("#"+form.name+" #form-error-container").html('<div class="alert alert-warning"><?php echo TEXT_PLEASE_WAIT_UNIQUE_FIELDS_CHECKING ?></div>').show().delay(5000).fadeOut();
+
+          $('.btn-primary-modal-action',form).prop('disabled',false);
+          
           return false;
         } 
         
@@ -41,6 +49,9 @@
         {
           $("#"+form.name+"  .unique-error").addClass('error');
           $("#"+form.name+" #form-error-container").html('<div class="alert alert-danger"><?php echo TEXT_UNIQUE_FIELD_VALUE_ERROR_GENERAL ?></div>').show().delay(5000).fadeOut();
+
+          $('.btn-primary-modal-action',form).prop('disabled',false);
+          
           return false;
         }
        
@@ -85,6 +96,21 @@
                 }).done(function() {
                   $("#ajax-modal").modal("hide")
                   $("#calendar' . str_replace('calendarreport','',$app_redirect_to) . '").fullCalendar("refetchEvents");
+                });
+            ';
+          }
+        //handle add item from pivot clalendar
+          elseif(strstr($app_redirect_to,'pivot_calendars'))
+          {
+          	$calendar_entity_id = str_replace('pivot_calendars','',$app_redirect_to);          	
+          	$calendar_id = pivot_calendars::get_calendar_id_by_calendar_entity($calendar_entity_id);
+          	echo '
+              $.ajax({type: "POST",
+                url: $("#' . $app_items_form_name . '").attr("action"),
+                data: $("#' . $app_items_form_name . '").serializeArray()
+                }).done(function() {
+                  $("#ajax-modal").modal("hide")
+                  $("#calendar' .  $calendar_id . '").fullCalendar("refetchEvents");
                 });
             ';
           }
@@ -294,4 +320,16 @@
 
 <!-- include form fields display rules  -->
 <?php require(component_path('items/forms_fields_rules.js')); ?>
+
+<?php 
+//insert custom javascript code
+	if(strlen(trim($entity_cfg->get('javascript_in_from'))))
+	{
+		echo '
+  			<script>
+  				' . $entity_cfg->get('javascript_in_from') . '
+  			</script>
+  			';
+	}
+?>
 	                                                                      

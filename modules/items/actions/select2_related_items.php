@@ -72,8 +72,19 @@ switch($app_module_action)
 			$listing_sql_query .= $items_search->build_search_sql_query();
 		}
 		 
-				
-		$listing_sql_query_order .= " order by e.id";
+		
+		$reports_info_query = db_query("select * from app_reports where length(listing_order_fields)>0 and entities_id='" . db_input($cfg->get('entity_id')). "' and reports_type='related_items_" . $field['id'] . "'");
+		if($reports_info = db_fetch_array($reports_info_query))
+		{
+			$info = reports::add_order_query($reports_info['listing_order_fields'],$cfg->get('entity_id'));
+			
+			$listing_sql_query .= $info['listing_sql_query'];
+		  $listing_sql_query_join .= $info['listing_sql_query_join'];  		  
+		}
+		else
+		{			
+			$listing_sql_query_order .= " order by e.id";
+		}
 					
 		
 		//prepare formula query

@@ -7,6 +7,14 @@
        
 <?php echo input_hidden_tag('entities_id',$_GET['entities_id']) . input_hidden_tag('fields_id',$_GET['fields_id']) ?>
 
+
+	<div class="form-group">
+  	<label class="col-md-4 control-label" for="is_active"><?php echo TEXT_IS_ACTIVE ?></label>
+    <div class="col-md-8">	
+  	  <div class="checkbox-list"><label class="checkbox-inline"><?php echo input_checkbox_tag('is_active','1',array('checked'=>$obj['is_active'])) ?></label></div>      
+    </div>			
+  </div>
+  
   <div class="form-group">
   	<label class="col-md-4 control-label" for="parent_id"><?php echo tooltip_icon(TEXT_CHOICES_PARENT_INFO) . TEXT_PARENT ?></label>
     <div class="col-md-8">	

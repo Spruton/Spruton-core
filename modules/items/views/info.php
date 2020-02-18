@@ -55,6 +55,9 @@ $item_page_columns  = explode('-',$entity_cfg->get('item_page_columns_size','8-4
 		//print templates
 		$item_actions_menu .= export_templates::get_users_templates_by_position($current_entity_id, 'default');
 		$item_actions_menu .= export_templates::get_users_templates_by_position($current_entity_id, 'menu_print');
+		
+		$item_actions_menu .= xml_export::get_users_templates_by_position($current_entity_id, 'default');
+		$item_actions_menu .= xml_export::get_users_templates_by_position($current_entity_id, 'menu_export');
   }
                                 
 $more_actions_menu = '';
@@ -124,8 +127,12 @@ if(strlen($item_actions_menu))
 		';
 }	
 
-?>            
-        
+
+//Stages panels
+echo stages_panel::render($current_entity_id,$item_info);
+
+?>    
+              
 <!-- Inlucde timer from Extension -->          
 <?php
   if(class_exists('timer'))
@@ -172,7 +179,13 @@ if(strlen($item_actions_menu))
     	
 //includes field entity imtes listins if configure for item info page
     	$field_entity_items_position = 'left_column';
-    	require(component_path('items/load_field_entity_items'));    	
+    	require(component_path('items/load_field_entity_items'));
+    	
+    	if(is_ext_installed())
+    	{
+    		$item_pivot_tables = new item_pivot_tables($current_entity_id,'left_column');
+    		echo $item_pivot_tables->render();
+    	}
     ?>
     
     <?php
@@ -216,6 +229,12 @@ if(strlen($item_actions_menu))
 //includes field entity imtes listins if configure for item info page
     		$field_entity_items_position = 'right_column';
     		require(component_path('items/load_field_entity_items'));
+    		
+    		if(is_ext_installed())
+    		{
+    			$item_pivot_tables = new item_pivot_tables($current_entity_id,'right_column');
+    			echo $item_pivot_tables->render();
+    		}
     		
     	?>
 	    

@@ -547,7 +547,7 @@ class items
     //prepare forumulas query
     $listing_sql_query_select = fieldtype_formula::prepare_query_select($entity_id, $listing_sql_query_select);
         
-    $item_query = db_query("select e.* " . $listing_sql_query_select . " from app_entity_" . $entity_id . " e where id='" . $item_id . "'");
+    $item_query = db_query("select e.* " . $listing_sql_query_select . " from app_entity_" . $entity_id . " e where id='" . $item_id . "'",false);
     $item = db_fetch_array($item_query);
     
     $html = '';
@@ -559,7 +559,7 @@ class items
     
     if($exclude_fields_types==true)
     {    	
-	    $exclude_fields_types = ",'fieldtype_google_map','fieldtype_mind_map','fieldtype_image_map','fieldtype_todo_list','fieldtype_textarea','fieldtype_textarea_wysiwyg','fieldtype_attachments','fieldtype_image','fieldtype_related_records','fieldtype_parent_item_id','fieldtype_mapbbcode'";
+	    $exclude_fields_types = ",'fieldtype_iframe','fieldtype_google_map_directions','fieldtype_google_map','fieldtype_mind_map','fieldtype_image_map','fieldtype_todo_list','fieldtype_textarea','fieldtype_textarea_wysiwyg','fieldtype_attachments','fieldtype_image','fieldtype_related_records','fieldtype_parent_item_id','fieldtype_mapbbcode'";
     }
     else
     {    	
@@ -629,7 +629,11 @@ class items
         		$is_multiple = true;
         	}
         	
-        	        	
+        	if(in_array($field['type'], ['fieldtype_boolean_checkbox','fieldtype_boolean']))
+        	{
+        		$value = ($value=='true' ? 1:0);
+        	}
+        	        	        	
         	$fields_display_rules[] = 'app_handle_forms_fields_display_rules(\'\',' . $field['id'] . ',"","' . (strlen($value) ? $value : '0') . '",' . (int)$is_multiple . '); ';
         }
         
@@ -754,7 +758,7 @@ class items
     $count = 0;
 
     $html = '';  
-    $fields_query = db_query("select f.* from app_fields f, app_forms_tabs t where f.type in ('fieldtype_google_map','fieldtype_mind_map','fieldtype_image_map','fieldtype_todo_list','fieldtype_textarea','fieldtype_textarea_wysiwyg','fieldtype_attachments','fieldtype_image','fieldtype_mapbbcode') and  f.entities_id='" . db_input($entity_id) . "' and f.forms_tabs_id=t.id order by t.sort_order, t.name, f.sort_order, f.name");
+    $fields_query = db_query("select f.* from app_fields f, app_forms_tabs t where f.type in ('fieldtype_iframe','fieldtype_google_map_directions','fieldtype_google_map','fieldtype_mind_map','fieldtype_image_map','fieldtype_todo_list','fieldtype_textarea','fieldtype_textarea_wysiwyg','fieldtype_attachments','fieldtype_image','fieldtype_mapbbcode') and  f.entities_id='" . db_input($entity_id) . "' and f.forms_tabs_id=t.id order by t.sort_order, t.name, f.sort_order, f.name");
     while($field = db_fetch_array($fields_query))
     {   
     	//exclude fields in email
@@ -1104,6 +1108,13 @@ class items
       	}
       }
       
+      $access_group_fields = array();
+      $fields_query = db_query("select f.id from app_fields f where f.type in ('fieldtype_access_group') and  f.entities_id='" . db_input($current_entity_id) . "'");
+      while($fields = db_fetch_array($fields_query))
+      {
+      	$access_group_fields[] = $fields['id'];
+      }
+      
       //if exist fields then check access by fields + created_by      
       //check users fields
         $sql_query_array = array();
@@ -1124,12 +1135,21 @@ class items
         	$sql_query_array[] = "(select count(*) as total from app_entity_" .$current_entity_id . "_values cv where cv.items_id=e.id and cv.fields_id='" . $id . "' and cv.value in (select id from app_global_lists_choices fc where fc.lists_id='" . $list_id . "' and find_in_set(" . $app_user['id']  . ",fc.users)))>0";
         }
         
+        //check access group fields
+        foreach($access_group_fields as $id)
+        {
+        	$sql_query_array[] = "(select count(*) as total from app_entity_" .$current_entity_id . "_values cv where cv.items_id=e.id and cv.fields_id='" . $id . "' and cv.value='" . $app_user['group_id'] . "')>0";
+        }
+        
         //check created by
         $sql_query_array[] = "e.created_by='" . $app_user['id'] . "'";
         
         $listing_sql_query .= " and (" . implode(' or ', $sql_query_array). ") ";
       
     }
+    
+    //add visibility access query
+    $listing_sql_query .= records_visibility::add_access_query($current_entity_id);
     
     return $listing_sql_query;     
   

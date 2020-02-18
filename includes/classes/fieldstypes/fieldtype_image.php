@@ -84,7 +84,8 @@ class fieldtype_image
   
   function output($options)
   {
-    
+  	$options_cfg = new fields_types_options_cfg($options);
+  	
     if(strlen($options['value'])>0)
     {  
       $file = attachments::parse_filename($options['value']);
@@ -92,6 +93,17 @@ class fieldtype_image
       if(isset($options['is_print']))
       {
       	return '<img width=120 height=120 src=' . url_for('items/info&path=' . $options['field']['entities_id']  ,'&action=download_attachment&preview=1&file=' . urlencode(base64_encode($options['value']))) . '>';
+      }
+      elseif(isset($options['is_email']))
+      {
+      	if($options_cfg->get('hide_attachments_url')==1)
+      	{
+      		return $file['name'];
+      	}
+      	else
+      	{
+      		return link_to($file['name'],url_for('items/info','path=' . $options['path'] . '&action=download_attachment&file=' . urlencode(base64_encode($options['value'])) . '&field=' . $options['field']['id']),array('target'=>'_blank')) . (!$use_file_storage ? ' <small>(' . $file['size']. ')</small>':'');
+      	}
       }
       elseif(isset($options['is_export']))
       {

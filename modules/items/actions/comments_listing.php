@@ -73,7 +73,9 @@ while($item = db_fetch_array($items_query))
                             'value'=>$field['fields_value'],
                             'field'=>$field, 
                             'path'=>$_POST['path'],
-    												'is_listing'=>true);
+    												'is_listing'=>true,
+    												'is_comments_listing' =>true,
+    );
         
     $html_fields .='                      
         <tr><th>&bull;&nbsp;' . $field['name'] . ':&nbsp;</th><td>' . fields_types::output($output_options). '</td></tr>           

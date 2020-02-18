@@ -75,17 +75,19 @@ class fieldtype_dropdown_multilevel
     {     
     	$default_id = global_lists::get_choices_default_id($cfg->get('use_global_list'));
     	
-      $choices_query = db_query("select * from app_global_lists_choices where lists_id = '" . db_input($cfg->get('use_global_list')). "' and parent_id=0 order by sort_order, name");
+      $choices_query = db_query("select * from app_global_lists_choices where lists_id = '" . db_input($cfg->get('use_global_list')). "' and parent_id=0 and (is_active=1 " . (strlen($obj['field_' . $field['id']]) ? " or id in (" . $obj['field_' . $field['id']] . ")":'') . ") order by sort_order, name");
       while($v = db_fetch_array($choices_query))
       {
       	$choices[$v['id']] = $v['name'];
+      	
+      	if(!$default_id) $default_id=$v['id'];
       }
     }
     else
     {  
     	$default_id = fields_choices::get_default_id($field['id']);
     	
-      $choices_query = db_query("select * from app_fields_choices where fields_id = '" . db_input($field['id']). "' and parent_id=0 order by sort_order, name");      
+      $choices_query = db_query("select * from app_fields_choices where fields_id = '" . db_input($field['id']). "' and parent_id=0 and (is_active=1 " . (strlen($obj['field_' . $field['id']]) ? " or id in (" . $obj['field_' . $field['id']] . ")":'') . ") order by sort_order, name");      
       while($v = db_fetch_array($choices_query))
       {
       	if($display_choices_values==1)
@@ -94,6 +96,8 @@ class fieldtype_dropdown_multilevel
       	}
       	
       	$choices[$v['id']] = $v['name'];
+      	
+      	if(!$default_id) $default_id=$v['id'];
       }
     }
               
@@ -217,8 +221,8 @@ class fieldtype_dropdown_multilevel
   			$field_id = $field['id'] . 'L'. $level;
   			
   			$html .= '
-			    <li style="cursor: pointer" class="insert_to_template_description">
-			      {#' . $field_id .':'. trim($level_name) . '}
+			    <li>
+			      <a href="#" class="insert_to_template_description">{#' . $field_id .':'. trim($level_name) . '}</a>
 			    </li>';
   				
   		}
@@ -226,8 +230,8 @@ class fieldtype_dropdown_multilevel
   	else
   	{
   		$html .= '
-	    <li style="cursor: pointer" class="insert_to_template_description">
-	      {#' . $field['id'] .':'. $field['name'] . '}
+	    <li>
+	      <a href="#" class="insert_to_template_description">{#' . $field['id'] .':'. $field['name'] . '}</a>
 	    </li>';
   	}
 
@@ -499,8 +503,8 @@ class fieldtype_dropdown_multilevel
   function get_js_tree_handler($field, $choices_tree_level, $values_array, $display_choices_values='')
   {
   	$cfg = new fields_types_cfg($field['configuration']);
-  	  	
-  	$js_tree = ($cfg->get('use_global_list') ? global_lists::get_js_level_tree($cfg->get('use_global_list')) : fields_choices::get_js_level_tree($field['id'],0,array(),0,$display_choices_values));	
+  	  	  	  	
+  	$js_tree = ($cfg->get('use_global_list') ? global_lists::get_js_level_tree($cfg->get('use_global_list'),0,array(),0,implode(',',$values_array)) : fields_choices::get_js_level_tree($field['id'],0,array(),0,$display_choices_values,implode(',',$values_array)));	
 
   	//echo '<pre>';
   	//print_r($js_tree);

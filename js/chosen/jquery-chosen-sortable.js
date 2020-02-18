@@ -10,11 +10,13 @@
             c = b.siblings("." + this.chosenClassPrefix() + "-container");
         return a(c.find("." + this.chosenClassPrefix() + '-choices li[class!="search-field"]').map(function() {
             text = a(this).html();            
-            text = text.replace(/<b class="group-name">(.*)<\/b>/, '').replace(/<\/?[^>]+(>|$)/g, "");
-            
+            text = text.replace(/<b class="group-name">(.*)<\/b>/, '').replace(/<\/?[^>]+(>|$)/g, "").replace(/&amp;/g,'&');
+            //text = text.replace(/&amp;/g,'&')
+            //alert(text)
             var value = false;
-            b.find("option:contains(" + text + ")").each(function(){
-            	if($(this).html()==text)
+            b.find("option:contains(" + text + ")").each(function(){            	
+            	//alert($(this).html()+'=='+text)
+            	if($(this).html().replace(/&amp;/g,'&')==text)
             	{	
             		value = this;            		
             	}
@@ -41,7 +43,7 @@
             }), b.closest("form") && b.closest("form").bind("submit", function() {
                 var a = b.chosenOrder();
                 b.children().remove(), b.append(a)  
-                alert(b.closest("form").attr('id'))
+                //alert(b.closest("form").attr('id'))
             })) : console.error("jquery-chosen-sortable requires JQuery UI to have been initialised.")
         })
     }

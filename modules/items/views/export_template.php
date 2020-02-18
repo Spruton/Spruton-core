@@ -11,7 +11,8 @@
 		<?php echo $template_info['template_css'] ?>
 	</style>
 		
-	<?php echo export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id'])?>	
+	<?php echo $template_info['template_header'] . export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id']) . $template_info['template_footer']; ?>
+		
 </div>
 
 <p>

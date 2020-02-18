@@ -71,7 +71,7 @@
 <tbody>
 <?php
 
-$panels_query = db_query("select * from app_filters_panels where entities_id='" . _get::int('entities_id') . "' order by position, sort_order");
+$panels_query = db_query("select * from app_filters_panels where entities_id='" . _get::int('entities_id') . "' and length(type)=0 order by position, sort_order");
 
 if(db_num_rows($panels_query)==0) echo '<tr><td colspan="9">' . TEXT_NO_RECORDS_FOUND. '</td></tr>'; 
 

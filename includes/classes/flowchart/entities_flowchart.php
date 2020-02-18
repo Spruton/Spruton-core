@@ -59,7 +59,7 @@ class entities_flowchart
   		$y = $tree['y'];
   		
   		$count_fields = 0;
-  		$check_fields_query = db_query("select * from app_fields where entities_id = '" . $entities['id'] . "' and type in ('fieldtype_users','fieldtype_grouped_users','fieldtype_entity','fieldtype_related_records','fieldtype_formula')");
+  		$check_fields_query = db_query("select * from app_fields where entities_id = '" . $entities['id'] . "' and type in ('fieldtype_users','fieldtype_grouped_users','fieldtype_entity','fieldtype_entity_ajax','fieldtype_entity_multilevel','fieldtype_related_records','fieldtype_formula')");
   		while($check_fields = db_fetch_array($check_fields_query))
   		{
   			if($check_fields['type']=='fieldtype_formula')
@@ -136,7 +136,7 @@ class entities_flowchart
   
   function build_entity_fields_nodes()
   {
-  	$fields_query = db_query("select * from app_fields where type in ('fieldtype_entity')");
+  	$fields_query = db_query("select * from app_fields where type in ('fieldtype_entity','fieldtype_entity_ajax','fieldtype_entity_multilevel')");
   	while($fields = db_fetch_array($fields_query))
   	{  		  	
   		//set coordinates for field entity
@@ -338,6 +338,8 @@ class entities_flowchart
   				$content .= TEXT_FORMULA . ': ' . $cfg->get('formula') . '<br>';
   				break;
   			case 'fieldtype_entity':
+  			case 'fieldtype_entity_ajax':
+  			case 'fieldtype_entity_multilevel':
   			case 'fieldtype_related_records':
   				$content .= TEXT_RELATIONSHIP_HEADING . ': ' . entities::get_name_by_id($cfg->get('entity_id')) . '<br>';
   				break;

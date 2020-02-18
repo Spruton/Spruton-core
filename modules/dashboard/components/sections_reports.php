@@ -40,6 +40,31 @@ switch(true)
 			}
 		}
 		break;
+	case strstr($section_report,'pivotreports'):
+		$reports_query = db_query("select * from app_ext_pivotreports where id='" . $reports_id. "'");
+		if($pivotreports = db_fetch_array($reports_query))
+		{			
+			if(in_array($app_user['group_id'],explode(',',$pivotreports['allowed_groups'])) or $app_user['group_id']==0)
+			{
+				echo '<h3 class="page-title"><a href="' . url_for('ext/pivotreports/view','id=' . $pivotreports['id']) . '">' . $pivotreports['name'] . '</a></h3>';
+				echo '
+						<style>
+							.pvtVals{
+								display:none;
+							}
+							.pvtRendererTD{
+								display:none;
+							}
+						</style>
+						';	
+				
+				//allow edit
+				$pivotreports = pivotreports::apply_allow_edit($pivotreports);
+				
+				require(component_path('ext/pivotreports/pivottable'));
+			}
+		}
+		break;		
 	case strstr($section_report,'calendar_personal'):
 		  echo '<h3 class="page-title"><a href="' . url_for('ext/calendar/personal') . '">' . TEXT_EXT_MY_СALENDAR . '</a></h3>';
 			require(component_path('ext/calendar/personal'));
@@ -61,6 +86,17 @@ switch(true)
 		{
 			echo '<h3 class="page-title"><a href="' . url_for('ext/calendar/report','id=' . $reports['id']) . '">' . $reports['name'] . '</a></h3>';
 			require(component_path('ext/calendar/report'));
+		}
+		break;
+	case strstr($section_report,'pivot_calendars'):
+		$reports_query = db_query("select * from app_ext_pivot_calendars where id='" . $reports_id . "'");
+		if($reports = db_fetch_array($reports_query))
+		{
+			if(pivot_calendars::has_access($reports['users_groups']))
+			{
+				echo '<h3 class="page-title"><a href="' . url_for('ext/pivot_calendars/view','id=' . $reports['id']) . '">' . $reports['name'] . '</a></h3>';
+				require(component_path('ext/pivot_calendars/report'));
+			}
 		}
 		break;
 }

@@ -64,15 +64,14 @@ class attachments
     {
     	$has_delte_access = true;
     	
-    	if($app_module_path=='items/form')
+    	if(in_array($app_module_path,['items/form','items/items']))
     	{
     		if($cfg->get('check_delete_access'))
     		{
-    			$has_delte_access = users::has_access('delete');
+    			$has_delte_access = users::has_access('delete');    			
     		}
     	}
-    	
-    			    		    	
+    	            			    		    
       $html .= '
       <div class="table-scrollable attachments-form-list">
       <table class="table table-striped table-hover">
@@ -225,7 +224,7 @@ class attachments
                  'file'=>(CFG_ENCRYPT_FILE_NAME==1 ? sha1(time() . '_' . $filename) : time() . '_' . $filename),
                  'folder'=>date('Y') . '/' . date('m') . '/' . date('d'));
   }
-  
+    
   public static function parse_filename($filename)
   {
     //get filetime

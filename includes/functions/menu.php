@@ -223,6 +223,20 @@
   	return $menu;
   }
   
+  function build_search_menu($menu)
+  {
+  	global $app_user;
+  	
+  	$allowed_groups = (strlen(CFG_GLOBAL_SEARCH_ALLOWED_GROUPS) ? explode(',',CFG_GLOBAL_SEARCH_ALLOWED_GROUPS):[]);
+  	
+  	if(CFG_USE_GLOBAL_SEARCH==1 and CFG_GLOBAL_SEARCH_DISPLAY_IN_MENU==1 and in_array($app_user['group_id'],$allowed_groups))
+  	{
+  		$menu[] = array('title'=>TEXT_SEARCH,'url'=>url_for('global_search/search'),'class'=>'fa-search');
+  	}
+  	  	
+  	return $menu;
+  }
+  
   function build_main_menu()
   {
     global $app_user;
@@ -244,6 +258,8 @@
     
     $menu = build_reports_menu($menu);
     
+    $menu = build_search_menu($menu);
+    
     if(count($plugin_menu = plugins::include_menu('menu'))>0)
     {
       $menu = array_merge($menu,$plugin_menu);
@@ -264,6 +280,7 @@
       $s[] = array('title'=>TEXT_MENU_LDAP,'url'=>url_for('configuration/ldap'));
       $s[] = array('title'=>TEXT_HOLIDAYS,'url'=>url_for('holidays/holidays'));
       $s[] = array('title'=>TEXT_MENU_LOGIN_PAGE,'url'=>url_for('configuration/login_page'));			
+      $s[] = array('title'=>TEXT_2STEP_VERIFICATION,'url'=>url_for('configuration/2step_verification'));
       $s[] = array('title'=>TEXT_MENU_USERS_REGISTRATION,'url'=>url_for('configuration/users_registration'));
       $s[] = array('title'=>TEXT_MENU_MAINTENANCE_MODE,'url'=>url_for('configuration/maintenance_mode'));
       

@@ -82,6 +82,12 @@ class entities_menu
 				$choices[TEXT_EXT_СALENDAR]['calendarreport' . $v['id']] = $v['name'];
 			}
 			
+			$reports_query = db_query("select id, name from app_ext_pivot_calendars order by sort_order, name");
+			while($v = db_fetch_array($reports_query))
+			{
+				$choices[TEXT_EXT_PIVOT_СALENDAR]['pivot_calendars' . $v['id']] = $v['name'];
+			}
+			
 			$reports_query = db_query("select id, name from app_ext_image_map order by name");
 			while($v = db_fetch_array($reports_query))
 			{
@@ -161,6 +167,7 @@ class entities_menu
 				'funnelchart',
 				'kanban',
 				'calendarreport',
+				'pivot_calendars',
 				'image_map',
 				'map_reports',
 		);
@@ -208,6 +215,9 @@ class entities_menu
 					break;
 				case strstr($reports_type,'calendarreport'):
 					$reports_table = 'app_ext_calendar';
+					break;
+				case strstr($reports_type,'pivot_calendars'):
+					$reports_table = 'app_ext_pivot_calendars';
 					break;
 				case strstr($reports_type,'image_map'):
 					$reports_table = 'app_ext_image_map';
@@ -375,6 +385,16 @@ class entities_menu
 					}
 					break;
 					
+				case strstr($reports_type,'pivot_calendars'):
+					$reports_query = db_query("select * from app_ext_pivot_calendars where id='" . $reports_id . "' order by sort_order, name");
+					while($reports_info = db_fetch_array($reports_query))
+					{
+						if(pivot_calendars::has_access($reports_info['users_groups']))
+						{
+							$sub_menu[] = array('title'=>$reports_info['name'],'url'=>url_for('ext/pivot_calendars/view','id=' . $reports_info['id']),'class'=>'fa-calendar');
+						}
+					}
+					break;
 				case strstr($reports_type,'image_map'):
 					$reports_query = db_query("select id, name, users_groups from app_ext_image_map where id='" . $reports_id. "'");
 					while($reports_info = db_fetch_array($reports_query))

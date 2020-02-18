@@ -52,7 +52,8 @@ function validate_user_form(form,url)
         $("div#form-error-container").delay(5000).fadeOut();
         
         $('.btn-primary-modal-action').show();
-        $('.primary-modal-action-loading').css('visibility','hidden');	
+        $('.primary-modal-action-loading').css('visibility','hidden');
+        $('.btn-primary-modal-action',form).prop('disabled',false);
       }
   });      
 }
@@ -187,6 +188,7 @@ function spruton_app_init()
         
             
   $( "textarea.editor" ).each(function() { use_editor($(this).attr('id'),false) });
+  $( "textarea.full-editor" ).each(function() { use_editor_full($(this).attr('id'),false,$(this).attr('editor-height')) });
   
   appHandlePopover();   
   
@@ -198,10 +200,13 @@ function spruton_app_init()
   $('.chosen-select').each(function(){      
       width = '100%';
 
-      if($(this).hasClass('input-small')) width = '120px';
-      if($(this).hasClass('input-medium')) width = '240px';
-      if($(this).hasClass('input-large')) width = '320px';
-      if($(this).hasClass('input-xlarge')) width = '480px';
+      if(!is_mobile)
+      {	
+      	if($(this).hasClass('input-small')) width = '120px';
+      	if($(this).hasClass('input-medium')) width = '240px';
+      	if($(this).hasClass('input-large')) width = '320px';
+      	if($(this).hasClass('input-xlarge')) width = '480px';
+      }
       
       $(this).chosen({width: width,
                       include_group_label_in_selected: true,
@@ -209,7 +214,7 @@ function spruton_app_init()
                       no_results_text:i18n['TEXT_NO_RESULTS_MATCH'],
                       placeholder_text_single:i18n['TEXT_SELECT_AN_OPTION'],
                       placeholder_text_multiple:i18n['TEXT_SELECT_SOME_OPTIONS']
-                      });
+                      }).chosenSortable();
    })
             
    $().UItoTop({
@@ -464,24 +469,32 @@ function appHandleUniform()
       });
   }
   
+  
  $('.datepicker').datepicker({
               rtl: App.isRTL(),
               autoclose: true,
               weekStart: app_cfg_first_day_of_week,
               format: 'yyyy-mm-dd',
-              clearBtn: true,
+              clearBtn: true,              
           });
-          
- $(".datetimepicker-field").datetimepicker({
+
+ 
+ $(".datetimepicker-field").each(function(){
+	  		
+ 		$(this).datetimepicker({
         autoclose: true,
         isRTL: App.isRTL(),
         format: "yyyy-mm-dd hh:ii",
         weekStart: app_cfg_first_day_of_week,
         pickerPosition: (App.isRTL() ? "bottom-right" : "bottom-left"),
         clearBtn: true,
-    }); 
+        endDate: $(this).attr('data-date-end-date'), 
+        startDate: $(this).attr('data-date-start-date'),
+    });
+ })
       
   $( "textarea.editor" ).each(function() { use_editor($(this).attr('id'),false) });
+ 	$( "textarea.full-editor" ).each(function() { use_editor_full($(this).attr('id'),false,$(this).attr('editor-height')) });
   $( "textarea.editor-auto-focus" ).each(function() { use_editor($(this).attr('id'),true) });
        
    $('.colorpicker-default').colorpicker()
@@ -575,10 +588,13 @@ function appHandleChosen()
   $('.chosen-select').each(function(){      
       width = '100%';
 
-      if($(this).hasClass('input-small')) width = '120px';
-      if($(this).hasClass('input-medium')) width = '240px';
-      if($(this).hasClass('input-large')) width = '320px';
-      if($(this).hasClass('input-xlarge')) width = '480px';
+      if(!is_mobile)
+      {
+      	if($(this).hasClass('input-small')) width = '120px';
+      	if($(this).hasClass('input-medium')) width = '240px';
+        if($(this).hasClass('input-large')) width = '320px';
+      	if($(this).hasClass('input-xlarge')) width = '480px';
+      }
       
       $(this).chosen({width: width,
                       include_group_label_in_selected: true,
@@ -864,6 +880,8 @@ function app_handle_listing_fixed_table_header(listing_obj,module_path)
 	
 	//get table object   
   var table_obj = $('.table',listing_obj);
+	
+	if(table_obj.attr('data-count-fixed-columns')>0) return false
 	
 	is_fixed_head = table_obj.attr('data-fixed-head')
 	
@@ -1314,14 +1332,19 @@ function app_handle_forms_fields_display_rules(container,fields_id, fileds_type,
 	}
 	else
 	{	
+				
 		//skip rules if no field (filed can be hidden in public form or public registration)
 		if(!$('.field_'+fields_id).length)
 		{
 			return false;	
 		}
 		
+		if(fileds_type=='fieldtype_boolean')
+		{
+			var field_val = ($('#fields_'+fields_id).val()=='true' ? '1':'0');			
+		}
 		//prepare value for radioboxes
-		if(fileds_type=='fieldtype_radioboxes')
+		else if(fileds_type=='fieldtype_radioboxes')
 		{
 			if($('.field_'+fields_id+':checked').length)
 			{

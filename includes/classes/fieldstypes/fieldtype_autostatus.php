@@ -13,8 +13,15 @@ class fieldtype_autostatus
   {
     $cfg = array();
     
-    $cfg[] = array('title'=>TEXT_NOTIFY_WHEN_CHANGED, 'name'=>'notify_when_changed','type'=>'checkbox','tooltip_icon'=>TEXT_NOTIFY_WHEN_CHANGED_TIP);
-                                         
+    $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_NOTIFY_WHEN_CHANGED, 'name'=>'notify_when_changed','type'=>'checkbox','tooltip_icon'=>TEXT_NOTIFY_WHEN_CHANGED_TIP);
+    
+    $cfg[TEXT_STAGES_PANEL][] = array('title'=>TEXT_TYPE,'name'=>'panel_type','type'=>'dropdown','params'=>array('class'=>'form-control input-medium'),
+    		'choices'=>[''=>'']+stages_panel::get_type_choices());
+    
+    $cfg[TEXT_STAGES_PANEL][] = array('title'=>TEXT_COLOR,'name'=>'color','type'=>'colorpicker');
+    
+    $cfg[TEXT_STAGES_PANEL][] = array('title'=>TEXT_ACTIVE_ITEM_COLOR,'name'=>'color_active','type'=>'colorpicker');
+                                                 
     return $cfg;
   }  
   

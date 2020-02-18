@@ -1,7 +1,7 @@
 <?php echo ajax_modal_template_header(TEXT_CONFIGURE_DASHBOARD) ?>
 
 <?php
-$common_reports_query = db_query("select count(*) as total from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and find_in_set(" . $app_user['group_id'] . ",r.users_groups) and r.reports_type = 'common' order by r.dashboard_sort_order, r.name");
+$common_reports_query = db_query("select count(*) as total from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and (find_in_set(" . $app_user['group_id'] . ",r.users_groups) or find_in_set(" . $app_user['id'] . ",r.assigned_to)) and r.reports_type = 'common' order by r.dashboard_sort_order, r.name");
 $common_reports = db_fetch_array($common_reports_query);
 $common_reports_count = $common_reports['total'];
 ?>
@@ -186,7 +186,7 @@ $common_reports_count = $common_reports['total'];
     <p><?php echo TEXT_EXT_COMMON_REPORTS_DASHBOARD_DESCRIPTION ?></p>
 <?php
   $common_reports_list = array();
-  $reports_query = db_query("select r.* from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and find_in_set(" . $app_user['group_id'] . ",r.users_groups) and r.reports_type = 'common' order by r.dashboard_sort_order, r.name");
+  $reports_query = db_query("select r.* from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and (find_in_set(" . $app_user['group_id'] . ",r.users_groups) or find_in_set(" . $app_user['id'] . ",r.assigned_to)) and r.reports_type = 'common' order by r.dashboard_sort_order, r.name");
   while($reports = db_fetch_array($reports_query))
   {
     $common_reports_list[$reports['id']] = $reports['name']; 

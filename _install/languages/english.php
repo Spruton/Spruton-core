@@ -7,7 +7,7 @@ define('TEXT_CHECKING_ENVIRONMENT_SUCCESS','Environment checked. No errors found
 define('TEXT_BUTTON_DATABASE_CONFIG','Database Config');
 define('TEXT_BUTTON_CHECK_ENVIRONMENT','Check Environment');
 define('TEXT_CHECK_ERROS_ABOVE','Please check all of the lines above when reporting installation problems.');
-define('TEXT_ERROR_PHP_VERSION','Error: requires PHP >= 5.4, Current version is %s');
+define('TEXT_ERROR_PHP_VERSION','Error: requires PHP>=5.4 or PHP<=7.3, Current version is %s');
 
 define('TEXT_ERROR_GD_LIB','PHP GD library is NOT installed on your web server');
 define('TEXT_ERROR_MBSTRING_LIB','PHP mbstring library is NOT installed on your web server');

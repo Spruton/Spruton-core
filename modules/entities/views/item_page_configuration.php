@@ -16,6 +16,7 @@
 	$choices['7-5'] = '60% - 40%';
 	$choices['8-4'] = '70% - 30%';
 	$choices['9-3'] = '80% - 20%';
+	$choices['12-12'] = '100% - 0%';
 ?>
   <div class="form-group">
   	<label class="col-md-3 control-label" for="cfg_menu_title"><?php echo TEXT_COLUMNS_SIZE; ?></label>

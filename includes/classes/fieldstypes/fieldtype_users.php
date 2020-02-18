@@ -14,25 +14,27 @@ class fieldtype_users
   	$entity_info = db_find('app_entities',$params['entities_id']);
   	
     $cfg = array();
-    $cfg[] = array('title'=>TEXT_DISPLAY_USERS_AS, 
-                   'name'=>'display_as',
-                   'tooltip'=>TEXT_DISPLAY_USERS_AS_TOOLTIP,
+    $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_DISPLAY_USERS_AS, 
+                   'name'=>'display_as',                   
                    'type'=>'dropdown',
-                   'params'=>array('class'=>'form-control input-medium'),
+                   'params'=>array('class'=>'form-control input-xlarge'),
                    'choices'=>array('dropdown'=>TEXT_DISPLAY_USERS_AS_DROPDOWN,'checkboxes'=>TEXT_DISPLAY_USERS_AS_CHECKBOXES,'dropdown_muliple'=>TEXT_DISPLAY_USERS_AS_DROPDOWN_MULTIPLE));
     
-    $cfg[] = array('title'=>TEXT_HIDE_FIELD_NAME, 'name'=>'hide_field_name','type'=>'checkbox','tooltip_icon'=>TEXT_HIDE_FIELD_NAME_TIP);
+    $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_HIDE_FIELD_NAME, 'name'=>'hide_field_name','type'=>'checkbox','tooltip_icon'=>TEXT_HIDE_FIELD_NAME_TIP);
     
-    $cfg[] = array('title'=>TEXT_DISABLE_NOTIFICATIONS, 'name'=>'disable_notification','type'=>'checkbox','tooltip_icon'=>TEXT_DISABLE_NOTIFICATIONS_FIELDS_INFO);
+    $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_DISABLE_NOTIFICATIONS, 'name'=>'disable_notification','type'=>'checkbox','tooltip_icon'=>TEXT_DISABLE_NOTIFICATIONS_FIELDS_INFO);
     
     if($entity_info['parent_id']>0)
     {
-    	$cfg[] = array('title'=>TEXT_DISABLE_USERS_DEPENDENCY, 'name'=>'disable_dependency','type'=>'checkbox','tooltip_icon'=>TEXT_DISABLE_USERS_DEPENDENCY_INFO);
+    	$cfg[TEXT_SETTINGS][] = array('title'=>TEXT_DISABLE_USERS_DEPENDENCY, 'name'=>'disable_dependency','type'=>'checkbox','tooltip_icon'=>TEXT_DISABLE_USERS_DEPENDENCY_INFO);
     }       
     
-    $cfg[] = array('title'=>TEXT_HIDE_ADMIN, 'name'=>'hide_admin','type'=>'checkbox');
+    $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_HIDE_ADMIN, 'name'=>'hide_admin','type'=>'checkbox');
     
-    $cfg[] = array('title'=>TEXT_AUTHORIZED_USER_BY_DEFAULT, 'name'=>'authorized_user_by_default','type'=>'checkbox','tooltip_icon'=>TEXT_AUTHORIZED_USER_BY_DEFAULT_INFO);
+    $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_AUTHORIZED_USER_BY_DEFAULT, 'name'=>'authorized_user_by_default','type'=>'checkbox','tooltip_icon'=>TEXT_AUTHORIZED_USER_BY_DEFAULT_INFO);
+    
+    $cfg[TEXT_EXTRA][] = array('title'=>TEXT_HIDE_ACCESS_GROUP, 'name'=>'hide_access_group','type'=>'checkbox');
+    $cfg[TEXT_EXTRA][] = array('title'=>TEXT_USERS_GROUPS, 'name'=>'use_groups','type'=>'dropdown','choices'=>access_groups::get_choices(false),'tooltip_icon'=>TEXT_USE_GROUPS_TIP,'params'=>array('class'=>'form-control input-xlarge chosen-select','multiple'=>'multiple'));
     
     return $cfg;
   }  
@@ -100,15 +102,26 @@ class fieldtype_users
   		$where_sql .= " and u.field_6>0 ";
   	}
   	
+  	//display users from selected users groups only
+  	if(is_array($cfg->get('use_groups')))
+  	{
+  		if(count($cfg->get('use_groups')))
+  		{
+  			$where_sql .= " and u.field_6 in (" . implode(',',$cfg->get('use_groups')) . ") ";
+  		}
+  	}
+  	
   	$choices = array();
-  	$order_by_sql = (CFG_APP_DISPLAY_USER_NAME_ORDER=='firstname_lastname' ? 'u.field_7, u.field_8' : 'u.field_8, u.field_7');
-  	$users_query = db_query("select u.*,a.name as group_name from app_entity_1 u left join app_access_groups a on a.id=u.field_6 where {$where_sql} order by group_name, " . $order_by_sql);
+  	$order_by_sql = ($cfg->get('hide_access_group')!=1 ? 'group_name,':'');
+  	$order_by_sql .= (CFG_APP_DISPLAY_USER_NAME_ORDER=='firstname_lastname' ? ' u.field_7, u.field_8' : ' u.field_8, u.field_7');
+  	$users_query = db_query("select u.*,a.name as group_name from app_entity_1 u left join app_access_groups a on a.id=u.field_6 where {$where_sql} order by " . $order_by_sql);
   	while($users = db_fetch_array($users_query))
   	{
   		if(!isset($access_schema[$users['field_6']]))
   		{
   			$access_schema[$users['field_6']] = array();
   		}
+  		  		
   	
   		if($users['field_6']==0 or in_array('view',$access_schema[$users['field_6']]) or in_array('view_assigned',$access_schema[$users['field_6']]))
   		{
@@ -116,7 +129,15 @@ class fieldtype_users
   			if($has_parent_users and !in_array($users['id'],$parent_users_list) and !in_array($users['id'],explode(',',$value))) continue;
   	
   			$group_name = (strlen($users['group_name'])>0 ? $users['group_name'] : TEXT_ADMINISTRATOR);
-  			$choices[$group_name][$users['id']] = $app_users_cache[$users['id']]['name'];
+  			
+  			if($cfg->get('hide_access_group')==1)
+  			{
+  				$choices[$users['id']] = $app_users_cache[$users['id']]['name'];
+  			}
+  			else
+  			{
+  				$choices[$group_name][$users['id']] = $app_users_cache[$users['id']]['name'];
+  			}
   		}
   	}
   	

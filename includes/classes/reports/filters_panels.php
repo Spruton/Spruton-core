@@ -16,8 +16,13 @@ class filters_panels
 		$this->vertical_width = $this->get_vertical_width();
 		
 		$this->fields_access_schema = users::get_fields_access_schema($entities_id,$app_user['group_id']);
+		
+		$this->type = '';
+		$this->load_items_listing_funciton_name  = 'load_items_listing';
+		$this->custom_panel_id = '';
+		$this->custom_panel_css = '';
 	}
-	
+			
 	static function get_fields_list($entities_id)
 	{
 		global $app_user;
@@ -39,19 +44,30 @@ class filters_panels
 		return $list;
 	}
 	
+	function set_type($type)
+	{
+		$this->type = $this->custom_panel_id = $type;
+		$this->custom_panel_css = '.' . $type;
+	}
+	
+	function set_items_listing_funciton_name($name)
+	{
+		$this->load_items_listing_funciton_name = $name;
+	}
+	
 	function render_horizontal()
 	{
-		global $app_user;
+		global $app_user, $app_module_path;
 				 		
 		$html = '<div class="filters-panels horizontal-filters-panels">';
 				
-		$panels_query = db_query("select * from app_filters_panels where position='horizontal' and (length(users_groups)=0 or find_in_set(" . $app_user['group_id'] . ",users_groups)) and is_active=1 and entities_id='" . $this->entities_id . "' order by sort_order");
+		$panels_query = db_query("select f.* from app_filters_panels f where (select count(*) from app_filters_panels_fields fp where fp.panels_id=f.id)>0 and f.position='horizontal' and f.type='" . $this->type . "' and (length(f.users_groups)=0 or find_in_set(" . $app_user['group_id'] . ",f.users_groups)) and f.is_active=1 and f.entities_id='" . $this->entities_id . "' order by f.sort_order");
 		$count_panels = db_num_rows($panels_query);
 		while($panels = db_fetch_array($panels_query))
 		{			
 			$html .= '<ul class="list-inline filters-panels-' . $panels['id'] . '">';
 			
-			$fields_query = db_query("select * from app_filters_panels_fields where panels_id='" . $panels['id'] . "' order by sort_order");								
+			$fields_query = db_query("select *, f.type from app_filters_panels_fields fp, app_fields f where f.id=fp.fields_id  and fp.panels_id='" . $panels['id'] . "' order by fp.sort_order");								
 			while($fields = db_fetch_array($fields_query))
 			{		
 				//check field access
@@ -59,6 +75,9 @@ class filters_panels
 				{
 					if($this->fields_access_schema[$fields['fields_id']]=='hide') continue;
 				}
+				
+				//skip filter by parent in main listing
+				if($app_module_path=='items/items' and $fields['type']=='fieldtype_parent_item_id') continue;				
 				
 				$html .= '<li>' . $this->render_fields($fields,$panels) . '</li>';
 			}
@@ -68,14 +87,16 @@ class filters_panels
 				$html .= '<li><br><a href="javascript: apply_panel_filters(' . $panels['id']. ')" class="btn btn-info" title="' . TEXT_SEARCH . '"><i class="fa fa-search" aria-hidden="true"></i> ' . TEXT_SEARCH . '</a></li>';
 			}
 						
-			$html .= '<li><br><a href="javascript: reset_panel_filters(' . $panels['id']. ')" class="btn btn-default" title="' . TEXT_RESET_FILTERS . '"><i class="fa fa-refresh" aria-hidden="true"></i></a></li>';
+			$html .= '<li><br><a href="javascript: reset_panel_filters' . $this->custom_panel_id . '(' . $panels['id']. ')" class="btn btn-default" title="' . TEXT_RESET_FILTERS . '"><i class="fa fa-refresh" aria-hidden="true"></i></a></li>';
 						
 			$html .= '</ul>';						
 		}
 		
 		$html .= '</div>';
 		
+		
 		$html .= $this->render_js();
+		
 		
 		return $html;
 	}
@@ -92,7 +113,7 @@ class filters_panels
 	
 	function render_vertical()
 	{
-		global $app_user;
+		global $app_user, $app_module_path;
 		
 		if($this->vertical_width==0) return '';
 		
@@ -107,7 +128,7 @@ class filters_panels
 					<div class="filters-panels-' . $panels['id'] . '">
 					';
 			
-			$fields_query = db_query("select * from app_filters_panels_fields where panels_id='" . $panels['id'] . "' order by sort_order");
+			$fields_query = db_query("select *, f.type from app_filters_panels_fields fp, app_fields f where f.id=fp.fields_id  and fp.panels_id='" . $panels['id'] . "' order by fp.sort_order");
 			while($fields = db_fetch_array($fields_query))
 			{
 				//check field access
@@ -115,6 +136,9 @@ class filters_panels
 				{
 					if($this->fields_access_schema[$fields['fields_id']]=='hide') continue;
 				}
+				
+				//skip filter by parent in main listing
+				if($app_module_path=='items/items' and $fields['type']=='fieldtype_parent_item_id') continue;
 				
 				$html .= '<div class="fields-container">' . $this->render_fields($fields,$panels) . '</div>';
 			}
@@ -156,15 +180,31 @@ class filters_panels
 		
 		$html = '				
 				<div class="heading">
-					' . $field_name . ': <a href="javascript:delete_field_fielter_value(' . $field_info['id'] . ')" title="' . TEXT_RESET . '"><i class="fa fa-times" aria-hidden="true"></i></a>						
+					' . $field_name . ': <a href="javascript:delete_field_fielter_value' . $this->custom_panel_id . '(' . $field_info['id'] . ')" title="' . TEXT_RESET . '"><i class="fa fa-times" aria-hidden="true"></i></a>						
 			  </div>';
 					
 		switch($field_info['type'])
 		{		
+			case 'fieldtype_parent_item_id':
+				$choices = [];
+				
+				$entity_info = db_find('app_entities',$field_info['entities_id']);
+				
+				if($entity_info['parent_id']>0)
+				{
+					$items_query = db_query("select e.* from app_entity_" . $entity_info['parent_id'] . " e where e.id>0 " . items::add_access_query($entity_info['parent_id'],'') . ' '. items::add_access_query_for_parent_entities($entity_info['parent_id']) . ' ' . items::add_listing_order_query_by_entity_id($entity_info['parent_id']));
+					while($items = db_fetch_array($items_query))
+					{
+						$choices[$items['id']] = items::get_heading_field($entity_info['parent_id'],$items['id']);
+					}
+				}
+				
+				break;
 			case 'fieldtype_date_added':
 			case 'fieldtype_date_updated':
 			case 'fieldtype_input_date':
 			case 'fieldtype_input_datetime':
+		  case 'fieldtype_dynamic_date':
 				
 				$filters_values = explode(',',$filters_values);
 				//print_r($reports_filters);
@@ -181,6 +221,10 @@ class filters_panels
 						</form>
 						';
 				break;
+			
+			case 'fieldtype_access_group':
+				$choices = fieldtype_access_group::get_choices($field_info);
+				break;
 				
 			case 'fieldtype_image_map':
 			case 'fieldtype_autostatus':
@@ -191,6 +235,7 @@ class filters_panels
 			case 'fieldtype_dropdown_multilevel':
 			case 'fieldtype_grouped_users':
 			case 'fieldtype_tags':
+			case 'fieldtype_stages':
 			
 				$cfg = new fields_types_cfg($field_info['configuration']);
 			
@@ -255,6 +300,11 @@ class filters_panels
 					$input_width = 'input-small';
 				}
 				
+				if(in_array($field_info['type'],['fieldtype_input','fieldtype_text_pattern_static']) and strlen($panel_field['width']))
+				{
+					$input_width = $panel_field['width'];
+				}
+				
 				if($panel_info['position']=='vertical')
 				{
 					$input_width = '';
@@ -265,6 +315,7 @@ class filters_panels
 							' . input_hidden_tag('field_id',$field_info['id']). '
 							<div class="input-group ' . $input_width . '">
 								' . input_tag('field_val',$filters_values,array('class'=>'form-control filters-panels-input-fields' . $panels_id_str . ' filters-panels-input-field-' . $field_info['id'], 'data-field-id'=>$field_info['id'])) .'
+								' . ($panel_field['search_type_match']==1 ? input_hidden_tag('search_type_match',1) : '') . '		
 								<span class="input-group-btn">
 									<button class="btn btn-default" type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
 								</span>
@@ -281,7 +332,7 @@ class filters_panels
 		{
 			$panel_field['width'] = '';
 		}
-		
+						
 		switch($panel_field['display_type'])
 		{
 			case 'dropdown':
@@ -307,12 +358,13 @@ class filters_panels
 	
 	function render_js()
 	{
+	
 		$html = '
 				<script>			
 					$(function(){
 				
 						//dorpdowns		
-						$(".filters-panels-fields").change(function(){
+						$("' . $this->custom_panel_css . ' .filters-panels-fields").change(function(){
 							field_id = $(this).attr("data-field-id")
 							field_val = $(this).val();
 							$.ajax({
@@ -320,24 +372,24 @@ class filters_panels
 								url: "' . url_for('reports/filters','action=set_field_fielter_value&reports_id=' . $this->reports_id) . '",
 								data: {field_id:field_id,field_val:field_val}								
 							}).done(function(){
-								load_items_listing("' . $this->listing_container. '",1)
+								' . $this->load_items_listing_funciton_name . '("' . $this->listing_container. '",1)
 							})						
 						})
 										
 						//input 
-						$(".filters-panels-form").submit(function(){
+						$("' . $this->custom_panel_css . ' .filters-panels-form").submit(function(){
 							$.ajax({
 								method: "POST",
 								url: "' . url_for('reports/filters','action=set_field_fielter_value&reports_id=' . $this->reports_id) . '",
 								data: $(this).serializeArray()								
 							}).done(function(){
-								load_items_listing("' . $this->listing_container. '",1)
+								' . $this->load_items_listing_funciton_name . '("' . $this->listing_container. '",1)
 							})
 						  return false;
 						})
 								
 						//checkoxes & radiboxes				
-						$(".filters-panels-checkbox-fields").change(function(){
+						$("' . $this->custom_panel_css . ' .filters-panels-checkbox-fields").change(function(){
 							field_id = $(this).attr("data-field-id")
 										
 							field_val = [];			
@@ -350,18 +402,18 @@ class filters_panels
 								url: "' . url_for('reports/filters','action=set_field_fielter_value&reports_id=' . $this->reports_id) . '",
 								data: {field_id:field_id,field_val:field_val}								
 							}).done(function(){
-								load_items_listing("' . $this->listing_container. '",1)
+								' . $this->load_items_listing_funciton_name . '("' . $this->listing_container. '",1)
 							})
 						})		
 										
 						//dates
 						var filters_panels_date_fields_is_init = false;
 										
-						$(".filters-panels-date-fields").click(function(){
+						$("' . $this->custom_panel_css . ' .filters-panels-date-fields").click(function(){
 							 filters_panels_date_fields_is_init = true;										
 						})				
 										
-						$(".filters-panels-date-fields").on("changeDate", function(e) {
+						$("' . $this->custom_panel_css . ' .filters-panels-date-fields").on("changeDate", function(e) {
 							
 							//skip ajax load for first load			
 							if(filters_panels_date_fields_is_init==false) return false;			
@@ -383,7 +435,7 @@ class filters_panels
 									url: "' . url_for('reports/filters','action=set_field_fielter_value&reports_id=' . $this->reports_id) . '",
 									data: {field_id:field_id,field_val:field_val}								
 								}).done(function(){
-									load_items_listing("' . $this->listing_container. '",1)
+									' . $this->load_items_listing_funciton_name . '("' . $this->listing_container. '",1)
 								})
 							
 							},100);			
@@ -391,7 +443,7 @@ class filters_panels
 						})				
 					})
 										
-					function apply_panel_filters(panel_id)
+					function apply_panel_filters' . $this->custom_panel_id . '(panel_id)
 					{						
 						fields_values = {};
 																						
@@ -450,11 +502,11 @@ class filters_panels
 								url: "' . url_for('reports/filters','action=set_multiple_fields_fielter_values&reports_id=' . $this->reports_id) . '",
 								data: {fields_values: fields_values}								
 							}).done(function(){
-								load_items_listing("' . $this->listing_container. '",1)
+								' . $this->load_items_listing_funciton_name . '("' . $this->listing_container. '",1)
 							})				
 					}					
 										
-					function delete_field_fielter_value(field_id)
+					function delete_field_fielter_value' . $this->custom_panel_id . '(field_id)
 					{
 						$(".filters-panels-field-"+field_id).val("");
 										
@@ -482,11 +534,11 @@ class filters_panels
 								url: "' . url_for('reports/filters','action=delete_field_fielter_value&reports_id=' . $this->reports_id) . '",
 								data: {field_id:field_id}								
 							}).done(function(){
-								load_items_listing("' . $this->listing_container. '",1)
+								' . $this->load_items_listing_funciton_name . '("' . $this->listing_container. '",1)
 							})				
 					}	
 										
-					function reset_panel_filters(panel_id)
+					function reset_panel_filters' . $this->custom_panel_id . '(panel_id)
 					{
 						$(".filters-panels-"+panel_id+" .form-control").val("");
 						$(".filters-panels-"+panel_id+" .chosen-select").trigger("chosen:updated");
@@ -503,12 +555,12 @@ class filters_panels
 								url: "' . url_for('reports/filters','action=reset_panel_filters&reports_id=' . $this->reports_id) . '",
 								data: {panels_id:panel_id}		
 							}).done(function(){
-								load_items_listing("' . $this->listing_container. '",1)
+								' . $this->load_items_listing_funciton_name . '("' . $this->listing_container. '",1)
 							})				
 					}					
 				</script>
 				';
-		
+				
 		return $html;
 	}
 	

@@ -248,6 +248,8 @@ class fieldtype_formula
     	$available_fields = $app_not_formula_fields_cache[$entities_id];
     }
     
+    //print_rr($app_formula_fields_cache);
+    
     //get formulas    
     if(isset($app_formula_fields_cache[$entities_id]))
     {
@@ -336,7 +338,7 @@ class fieldtype_formula
 	        }
 	        	        	        
 	        if(strstr($formula,'{') and class_exists('functions'))
-	        {
+	        {	        	
 	          $formula = functions::prepare_formula_query($entities_id, $formula);
 	        }
 	        

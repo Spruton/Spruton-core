@@ -157,17 +157,40 @@ class fieldtype_related_records
                   
       $table_info = related_records::get_related_items_table_name($options['entities_id'],$cfg->get('entity_id'));
       
-      $where_sql = '';
       
-      if(strlen($table_info['sufix'])>0)
+      //if quick filters panels then use search function
+      if($filters['filters_condition']=='include')
       {
-      	$where_sql = " or ri.entity_" . $options['entities_id'] . $table_info['sufix'] . "_items_id=e.id ";
+      	$where_sql = '';
+	      
+	      if(strlen($table_info['sufix'])>0)
+	      {
+	      	$where_sql = " or ri.entity_" . $options['entities_id'] . $table_info['sufix'] . "_items_id=e.id ";
+	      }
+	      
+	      $search_sql = " and ri.entity_" . $cfg->get('entity_id') . "_items_id in 
+	      		(select rie.id from app_entity_" . $cfg->get('entity_id') . " rie where " . (fields::get_heading_id($cfg->get('entity_id')) ? "rie.field_" . fields::get_heading_id($cfg->get('entity_id')) . " like '%" . db_input($filters['filters_values']) . "%'" : "rie.id='" . db_input($filters['filters_values']) . "'") . ")";
+	      
+	      $sql = "(select count(*) as total from " . $table_info['table_name'] . " ri where (ri.entity_" . $options['entities_id'] . "_items_id=e.id {$where_sql}) {$search_sql})";
+	      
+	      //echo $sql;
+	      
+	      $sql_query[] =  $sql . ">0";
+      }	
+      else
+      {
+	      $where_sql = '';
+	      
+	      if(strlen($table_info['sufix'])>0)
+	      {
+	      	$where_sql = " or ri.entity_" . $options['entities_id'] . $table_info['sufix'] . "_items_id=e.id ";
+	      }
+	      
+	      $sql = "(select count(*) as total from " . $table_info['table_name'] . " ri where ri.entity_" . $options['entities_id'] . "_items_id=e.id {$where_sql})";
+	      
+	                                          
+	      $sql_query[] = ($filters['filters_values']=='include' ? $sql . ">0" : $sql . "=0");
       }
-      
-      $sql = "(select count(*) as total from " . $table_info['table_name'] . " ri where ri.entity_" . $options['entities_id'] . "_items_id=e.id {$where_sql})";
-      
-                                          
-      $sql_query[] = ($filters['filters_values']=='include' ? $sql . ">0" : $sql . "=0");
     }
                       
     return $sql_query;

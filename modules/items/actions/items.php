@@ -47,7 +47,10 @@ switch($app_module_action)
         $fields_access_schema += $access_rules->get_fields_view_only_access();
         
         //add creators to send to
-        $app_send_to[] = $item_info['created_by'];
+        if(fieldtype_created_by::is_notification_enabled($current_entity_id))
+        {
+        	$app_send_to[] = $item_info['created_by'];
+        }
       }
       
       //prepare item data      
@@ -55,7 +58,7 @@ switch($app_module_action)
       
       $choices_values = new choices_values($current_entity_id);
                                     
-      $fields_query = db_query("select f.* from app_fields f where f.type not in (" . fields_types::get_reserverd_types_list(). ",'fieldtype_related_records','fieldtype_user_last_login_date','fieldtype_google_map') and  f.entities_id='" . db_input($current_entity_id) . "' order by f.sort_order, f.name");
+      $fields_query = db_query("select f.* from app_fields f where f.type not in (" . fields_types::get_reserverd_types_list(). ",'fieldtype_related_records','fieldtype_user_last_login_date','fieldtype_google_map','fieldtype_google_map_directions') and  f.entities_id='" . db_input($current_entity_id) . "' order by f.sort_order, f.name");
       while($field = db_fetch_array($fields_query))
       {
         $default_field_value = '';
@@ -132,6 +135,9 @@ switch($app_module_action)
         //prepare choices values for fields with multiple values
         $choices_values->prepare($process_options);        
       } 
+      
+      //print_rr($sql_data);
+      //exit();
                         
       if(isset($_GET['id']))
       {            	      	
@@ -297,23 +303,25 @@ switch($app_module_action)
             $new_subject = (strlen($entity_cfg->get('email_subject_new_item'))>0 ? $entity_cfg->get('email_subject_new_item') . ' ' . $item_name : TEXT_DEFAULT_EMAIL_SUBJECT_NEW_ITEM . ' ' . $item_name);
             $new_heading = users::use_email_pattern_style('<div><a href="' . url_for('items/info','path=' . $_POST['path'] . '-' . $item_id,true) . '"><h3>' . $new_subject . '</h3></a></div>','email_heading_content');
             
-            if(users_cfg::get_value_by_users_id($send_to, 'disable_notification')!=1)
+            if(users_cfg::get_value_by_users_id($send_to, 'disable_notification')!=1 and $entity_cfg->get('disable_notification')!=1)
             {
             	users::send_to(array($send_to),$new_subject,$new_heading . $body);
             }
             
             //add users notification
-            users_notifications::add($new_subject, 'new_item', $send_to, $current_entity_id, $item_id);
+            if($entity_cfg->get('disable_internal_notification')!=1)
+            	users_notifications::add($new_subject, 'new_item', $send_to, $current_entity_id, $item_id);
           }
           else          
           {
-          	if(users_cfg::get_value_by_users_id($send_to, 'disable_notification')!=1)
+          	if(users_cfg::get_value_by_users_id($send_to, 'disable_notification')!=1 and $entity_cfg->get('disable_notification')!=1)
             {
             	users::send_to(array($send_to),$subject,$heading . $body);
             }
             
             //add users notification
-            users_notifications::add($subject, $users_notifications_type, $send_to, $current_entity_id, $item_id);
+            if($entity_cfg->get('disable_internal_notification')!=1)
+            	users_notifications::add($subject, $users_notifications_type, $send_to, $current_entity_id, $item_id);
           }                                       
         } 
                        
@@ -324,7 +332,7 @@ switch($app_module_action)
        
        
       //set off redirect if add items from calendar reprot
-      if(strstr($app_redirect_to,'calendarreport'))
+      if(strstr($app_redirect_to,'calendarreport') or strstr($app_redirect_to,'pivot_calendars'))
       {
         exit();
       } 

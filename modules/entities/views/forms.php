@@ -3,7 +3,10 @@
 
 <h3 class="page-title"><?php echo  TEXT_NAV_FORM_CONFIG ?></h3>
 
-<?php echo button_tag(TEXT_BUTTON_ADD_FORM_TAB,url_for('entities/forms_tabs_form','entities_id=' . $_GET['entities_id']))?>
+<p><?php echo TEXT_FORM_CONFIG_INFO ?></p>
+
+<?php echo button_tag(TEXT_BUTTON_ADD_FORM_TAB,url_for('entities/forms_tabs_form','entities_id=' . $_GET['entities_id'])) . '&nbsp;' ?>
+<?php echo button_tag(TEXT_ADD_JAVASCRIPT,url_for('entities/forms_custom_js','entities_id=' . $_GET['entities_id']),true,['class'=>'btn btn-default'])?>
 
 <div class="forms_tabs" style="max-width: 960px;">
 <ol id="forms_tabs_ol" class="sortable_tabs sortable">
@@ -105,4 +108,7 @@ echo '
     	});
   });  
 </script> 
+
+
+
 

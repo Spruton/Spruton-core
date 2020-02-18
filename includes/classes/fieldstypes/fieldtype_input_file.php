@@ -98,7 +98,8 @@ class fieldtype_input_file
   }
   
   function output($options)
-  {
+  {  	
+  	$options_cfg = new fields_types_options_cfg($options);
     
     if(strlen($options['value'])>0)
     {  
@@ -116,6 +117,17 @@ class fieldtype_input_file
       if(isset($options['is_public_form']))
       {
       	return link_to($file['name'],url_for('ext/public/check','action=download_attachment&id=' . $options['is_public_form'] . '&item=' . $options['item']['id'] . '&field=' . $options['field']['id'] . '&file=' . urlencode(base64_encode($options['value'])) . '&field=' . $options['field']['id']),array('target'=>'_blank')) . (!$use_file_storage ? '  <small>(' . $file['size']. ')</small>' : '');
+      }
+      elseif(isset($options['is_email']))
+      {      	      	
+      	if($options_cfg->get('hide_attachments_url')==1)
+      	{
+      		return $file['name'];
+      	}
+      	else
+      	{
+      		return link_to($file['name'],url_for('items/info','path=' . $options['path'] . '&action=download_attachment&file=' . urlencode(base64_encode($options['value'])) . '&field=' . $options['field']['id']),array('target'=>'_blank')) . (!$use_file_storage ? ' <small>(' . $file['size']. ')</small>':'');
+      	}
       }
       elseif(isset($options['is_export']))
       {

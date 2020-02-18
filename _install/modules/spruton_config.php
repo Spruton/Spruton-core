@@ -102,7 +102,10 @@
   </div>    
 
 
-<div><input type="submit" value="<?php echo TEXT_BUTTON_INSTALL ?>" class="btn btn-primary"></div>
+<div>
+	<input type="submit" value="<?php echo TEXT_BUTTON_INSTALL ?>" class="btn btn-primary btn-primary-modal-action">
+	<div class="fa fa-spinner fa-spin primary-modal-action-loading"></div>
+</div>
 
 <input type="hidden" name="db_host"  value="<?php echo trim(addslashes($_POST['db_host']))?>">
 <input type="hidden" name="db_port" value="<?php echo trim(addslashes($_POST['db_port']))?>">
@@ -113,6 +116,11 @@
 </form>
 
 <script>
-  $('#configuration').validate();
+  $('#configuration').validate({
+		submitHandler: function(form){
+			app_prepare_modal_action_loading(form)
+			return true;
+		}
+  });
 </script>
  

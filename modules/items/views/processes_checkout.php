@@ -36,9 +36,15 @@
 						
 			$html .= '
 				<div style="margin-bottom: 5px;">
-					<table><tr><td>'  . input_radiobox_tag('payment_module',$modules_id,$params) . '</td><td><label style="margin-bottom: 0; margin-top: 2px;" for="payment_module_' .$modules_id  . '">' . $modules_title . '</label></td></tr></table>
+					<table><tr><td><label style="margin-bottom: 0; margin-top: 2px;">'  . input_radiobox_tag('payment_module',$modules_id,$params) . ' ' . $modules_title . '</label></td></tr></table>
 		    </div>
 			';
+			
+			//load js for stripe module
+			if(isset($module->js))
+			{
+				$html .= $module->js;
+			}
 			
 			$count++;
 		}

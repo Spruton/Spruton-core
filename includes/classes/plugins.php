@@ -131,6 +131,8 @@ class plugins
       
       $html .= export_templates::get_users_templates_by_position($reports_info['entities_id'], 'menu_with_selected_dashboard','&reports_id=' . $reports_id . $url_params . (!strstr($url_params,'path') ? '&path=' . $reports_info['entities_id'] : '') );
       
+      $html .= xml_export::get_users_templates_by_position($reports_info['entities_id'], 'menu_with_selected_dashboard','&reports_id=' . $reports_id . $url_params . (!strstr($url_params,'path') ? '&path=' . $reports_info['entities_id'] : '') );
+      
       
     }
     

@@ -116,6 +116,12 @@
 	require('includes/classes/fieldstypes/fieldtype_entity_multilevel.php');
 	require('includes/classes/fieldstypes/fieldtype_months_difference.php');
 	require('includes/classes/fieldstypes/fieldtype_users_approve.php');
+	require('includes/classes/fieldstypes/fieldtype_google_map_directions.php');
+	require('includes/classes/fieldstypes/fieldtype_dynamic_date.php');
+	require('includes/classes/fieldstypes/fieldtype_access_group.php');
+	require('includes/classes/fieldstypes/fieldtype_signature.php');
+	require('includes/classes/fieldstypes/fieldtype_stages.php');
+	require('includes/classes/fieldstypes/fieldtype_iframe.php');
 
 //include models
 	require('includes/classes/model/access_groups.php');
@@ -140,6 +146,8 @@
 	require('includes/classes/users/users_notifications.php');
 	require('includes/classes/users/users_login_log.php');	
 	require('includes/classes/users/user_roles.php');
+	require('includes/classes/users/records_visibility.php');
+	require('includes/classes/users/2step_verification.php');
 	
 //items
 	require('classes/items/items.php');
@@ -147,6 +155,7 @@
 	require('classes/items/items_listing.php');
 	require('classes/items/items_copy.php');
 	require('classes/items/approved_items.php');
+	require('classes/items/stages_panel.php');
 	
 //reports	
 	require('includes/classes/reports/reports.php');
@@ -241,9 +250,25 @@
 	if(!defined('CFG_LDAP_LASTNAME_ATTRIBUTE')) define('CFG_LDAP_LASTNAME_ATTRIBUTE','');
 	if(!defined('CFG_PUBLIC_REGISTRATION_USER_AGREEMENT')) define('CFG_PUBLIC_REGISTRATION_USER_AGREEMENT','');
 	if(!defined('CFG_ENCRYPT_FILE_NAME')) define('CFG_ENCRYPT_FILE_NAME',1);	
-	if(!defined('CFG_MAINTENANCE_ALLOW_LOGIN_FOR_USERS')) define('CFG_MAINTENANCE_ALLOW_LOGIN_FOR_USERS','');
+	if(!defined('CFG_MAINTENANCE_ALLOW_LOGIN_FOR_USERS')) define('CFG_MAINTENANCE_ALLOW_LOGIN_FOR_USERS','');	
+	if(!defined('CFG_USE_GLOBAL_SEARCH')) define('CFG_USE_GLOBAL_SEARCH',0);
+	if(!defined('CFG_GLOBAL_SEARCH_ALLOWED_GROUPS')) define('CFG_GLOBAL_SEARCH_ALLOWED_GROUPS','');
+	if(!defined('CFG_GLOBAL_SEARCH_ROWS_PER_PAGE')) define('CFG_GLOBAL_SEARCH_ROWS_PER_PAGE',CFG_APP_ROWS_PER_PAGE);
+	if(!defined('CFG_GLOBAL_SEARCH_INPUT_MIN')) define('CFG_GLOBAL_SEARCH_INPUT_MIN',3);
+	if(!defined('CFG_GLOBAL_SEARCH_INPUT_MAX')) define('CFG_GLOBAL_SEARCH_INPUT_MAX',40);	
+	if(!defined('CFG_GLOBAL_SEARCH_DISPLAY_IN_HEADER')) define('CFG_GLOBAL_SEARCH_DISPLAY_IN_HEADER',0);
+	if(!defined('CFG_GLOBAL_SEARCH_DISPLAY_IN_MENU')) define('CFG_GLOBAL_SEARCH_DISPLAY_IN_MENU',0);
+	if(!defined('CFG_PUBLIC_ATTACHMENTS')) define('CFG_PUBLIC_ATTACHMENTS','');
+	if(!defined('CFG_LOGIN_DIGITAL_SIGNATURE_MODULE')) define('CFG_LOGIN_DIGITAL_SIGNATURE_MODULE','');
+	if(!defined('CFG_2STEP_VERIFICATION_ENABLED')) define('CFG_2STEP_VERIFICATION_ENABLED',0);
+	if(!defined('CFG_2STEP_VERIFICATION_TYPE')) define('CFG_2STEP_VERIFICATION_TYPE','email');
+	if(!defined('CFG_2STEP_VERIFICATION_SMS_MODULE')) define('CFG_2STEP_VERIFICATION_SMS_MODULE','');
+	if(!defined('2STEP_VERIFICATION_USER_PHONE')) define('2STEP_VERIFICATION_USER_PHONE','');
 	
-																				
+	
+	
+			
+																								
 //get max upload file size
 	define('CFG_SERVER_UPLOAD_MAX_FILESIZE',((int)ini_get("post_max_size")<(int)ini_get("upload_max_filesize") ? (int)ini_get("post_max_size") : (int)ini_get("upload_max_filesize")));
 
@@ -265,6 +290,7 @@
 	$app_entities_cache = entities::get_cache();
 	$app_choices_cache = fields_choices::get_cache();
 	$app_global_choices_cache = global_lists::get_cache();
+	$app_access_groups_cache = access_groups::get_cache();
 	
 	$app_num2str = new num2str();
 	

@@ -30,7 +30,7 @@ class fields
 	static function not_formula_fields_cache()
 	{
 		$cache = array();
-		$fields_query = db_query("select * from app_fields where type not in ('fieldtype_formula')");
+		$fields_query = db_query("select * from app_fields where type not in ('fieldtype_formula','fieldtype_dynamic_date')");
 		while($fields = db_fetch_array($fields_query))
 		{
 			$cache[$fields['entities_id']][] = $fields['id'];
@@ -42,7 +42,7 @@ class fields
 	static function formula_fields_cache()
 	{
 		$cache = array();
-		$fields_query = db_query("select * from app_fields where type in ('fieldtype_formula')");
+		$fields_query = db_query("select * from app_fields where type in ('fieldtype_formula','fieldtype_dynamic_date')");
 		while($fields = db_fetch_array($fields_query))
 		{
 			$cache[$fields['entities_id']][] = array(
@@ -326,11 +326,21 @@ class fields
       //check if field type changed
       if($field_info['type']!=$new_type)
       {        
+      	//delete index
+      	$check_query = db_query("SHOW INDEX FROM app_entity_" . $field_info['entities_id'] . " WHERE KEY_NAME = 'idx_field_" . $field_info['id'] . "'");
+      	if($check = db_fetch_array($check_query))
+      	{     
+      		db_query("ALTER TABLE app_entity_" . $field_info['entities_id'] . " DROP INDEX idx_field_" . $field_info['id']);
+      	}
+      	
  				//prepare db field type
  				db_query("ALTER TABLE app_entity_" . $field_info['entities_id']. " CHANGE field_" . $field_info['id'] . " field_" . $field_info['id'] . " " . entities::prepare_field_type($new_type) . " NOT NULL;");
       	
         //delete all filters for this field type since they are will not work correclty
         db_delete_row('app_reports_filters',$field_id,'fields_id');
+        
+        //add index
+        entities::prepare_field_index($field_info['entities_id'], $field_info['id'], $new_type);
       }
     }                         
   }
@@ -382,6 +392,52 @@ class fields
     
     return $data;
   } 
+  
+  public static function get_items_fields_fresh_data($item, $fields_list = '',$entities_id, $fields_access_schema)
+  {
+  	global $app_choices_cache, $app_users_cache;
+  
+  	$data = array();
+  
+  	if(strlen($fields_list)>0)
+  	{
+  		$fields_query = db_query("select f.* from app_fields f, app_forms_tabs t where  f.id in (" . $fields_list . ") and  f.entities_id='" . db_input($entities_id) . "' and f.forms_tabs_id=t.id order by field(f.id," . $fields_list . ")");
+  		while($field = db_fetch_array($fields_query))
+  		{
+  			//check field access
+  			if(isset($fields_access_schema[$field['id']]))
+  			{
+  				if($fields_access_schema[$field['id']]=='hide') continue;
+  			}
+  			 
+  			if(in_array($field['type'],fields_types::get_reserved_data_types()))
+  			{
+  				$value = $item[fields_types::get_reserved_filed_name_by_type($field['type'])];
+  			}
+  			else
+  			{
+  				$value = $item['field_' . $field['id']];
+  			}
+  
+  			$output_options = array('class'=>$field['type'],
+  					'value'=>$value,
+  					'field'=>$field,
+  					'item'=>$item,
+  					'is_listing'=>true,
+  					'redirect_to' => '',
+  					'reports_id'=> 0,
+  					'path'=> '');
+  
+  			$data[] = array(
+  					'name'=> fields_types::get_option($field['type'],'name',$field['name']),
+  					'value'=>fields_types::output($output_options),
+  					'type'=>$field['type'],
+  			);
+  		}
+  	}
+  
+  	return $data;
+  }
   
   public static function get_field_choices_background_data($field_id)
   {
@@ -467,11 +523,11 @@ class fields
   	return $choices;
   }
   
-  static function get_available_fields_helper($entities_id, $template_field_id, $dropdown_title = TEXT_AVAILABLE_FIELDS, $use_fieldtypes = [])
+  static function get_available_fields_helper($entities_id, $template_field_id, $dropdown_title = TEXT_AVAILABLE_FIELDS, $use_fieldtypes = [], $skip_reserved = false)
   {  	
   	$entities_info = db_find('app_entities',$entities_id);
   	
-  	$unique_id = rand(1000,9999);
+  	$unique_id = $entities_id . rand(1000,9999);
   	
   	$where_sql = '';
   	if(count($use_fieldtypes))
@@ -483,7 +539,7 @@ class fields
   	 
   	$fields_query = db_query("select f.*, t.name as tab_name from app_fields f, app_forms_tabs t where f.type not in (" . fields_types::get_reserverd_types_list() . ") and f.entities_id='" . $entities_id . "' and f.forms_tabs_id=t.id {$where_sql} order by t.sort_order, t.name, f.sort_order, f.name");
   	 
-  	if(db_num_rows($fields_query)==0) exit();
+  	if(db_num_rows($fields_query)==0) return '';
   	 
   	$html = '
   			<div class="dropdown">
@@ -494,7 +550,7 @@ class fields
   			<ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="max-height: 250px; overflow-y: auto">';
   	
   	
-  	if(!count($use_fieldtypes))
+  	if(!count($use_fieldtypes) and !$skip_reserved)
   	{
 	  	$html .= '  			  			
 	  	    <li>
@@ -516,10 +572,10 @@ class fields
 		  	    </li>';
 	  	}
   	}
-  	 
+  	    	
   	while($v = db_fetch_array($fields_query))
   	{
-  		if($v['type']=='fieldtype_dropdown_multilevel')
+  		if($v['type']=='fieldtype_dropdown_multilevel' and count($use_fieldtypes))
   		{
   			$html .= fieldtype_dropdown_multilevel::output_export_template($v);
   		}
@@ -564,6 +620,35 @@ class fields
   	
   	return $list;
   	
+  }
+  
+  static function prepare_field_db_name_by_type($entities_id, $fields_id, $alias='e')
+  {
+  	global $app_fields_cache;
+  	
+  	switch($app_fields_cache[$entities_id][$fields_id]['type'])
+  	{
+  		case 'fieldtype_id':
+  			$sql = $alias . ".id";
+  			break;
+  		case 'fieldtype_created_by':
+  			$sql = $alias . ".created_by";
+  			break;
+  		case 'fieldtype_date_added':
+  			$sql = $alias . ".date_added";
+  			break;
+  		case 'fieldtype_date_updated':
+  			$sql = $alias . ".date_updated";
+  			break;
+  		case 'fieldtype_parent_item_id':
+  			$sql = $alias . ".parent_item_id";
+  			break;
+  		default:
+  			$sql = $alias . ".field_" . $fields_id;
+  			break;
+  	}
+  	
+  	return $sql;
   }
         
 }

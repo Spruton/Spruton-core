@@ -95,6 +95,8 @@ class reports_sections
 				$choices[TEXT_EXT_СALENDAR]['calendar_public'] = TEXT_EXT_СALENDAR_PUBLIC;
 			}
 			
+			
+			//calendar preport
 			if($app_user['group_id']>0)
 			{
 				$reports_query = db_query("select c.* from app_ext_calendar c, app_entities e, app_ext_calendar_access ca where e.id=c.entities_id and c.id=ca.calendar_id and ca.access_groups_id='" . db_input($app_user['group_id']) . "' order by c.name");
@@ -108,6 +110,17 @@ class reports_sections
 				$choices[TEXT_EXT_СALENDAR]['calendarreport' . $v['id']] = $v['name'];
 			}
 			
+			//pivot calendar preport			
+			$reports_query = db_query("select id, name, users_groups from app_ext_pivot_calendars order by name");			
+			while($reports = db_fetch_array($reports_query))
+			{
+				if(pivot_calendars::has_access($reports['users_groups']))
+				{
+					$choices[TEXT_EXT_PIVOT_СALENDAR]['pivot_calendars' . $reports['id']] = $reports['name'];
+				}
+			}
+			
+			//graphic			
 			$reports_query = db_query("select id, name, allowed_groups from app_ext_graphicreport order by name");
 			while($v = db_fetch_array($reports_query))
 			{
@@ -117,12 +130,23 @@ class reports_sections
 				}
 			}
 			
+			//funnel
 			$reports_query = db_query("select id, name, users_groups from app_ext_funnelchart order by name");
 			while($v = db_fetch_array($reports_query))
 			{
 				if(in_array($app_user['group_id'],explode(',',$v['users_groups'])) or $app_user['group_id']==0)
 				{
 					$choices[TEXT_EXT_FUNNELCHART]['funnelchart' . $v['id']] = $v['name'];
+				}
+			}
+			
+			//pivot
+			$reports_query = db_query("select id, name, allowed_groups from app_ext_pivotreports order by name");
+			while($v = db_fetch_array($reports_query))
+			{
+				if(in_array($app_user['group_id'],explode(',',$v['allowed_groups'])) or $app_user['group_id']==0)
+				{
+					$choices[TEXT_EXT_PIVOTREPORTS]['pivotreports' . $v['id']] = $v['name'];
 				}
 			}
 		}

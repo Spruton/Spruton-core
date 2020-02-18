@@ -4,6 +4,8 @@
   {
     if(IS_AJAX)
     {
+    	if($module=='ext/license/key') exit();
+    	
       echo '<script>window.top.location.href="' . url_for($module,$prams) . '"</script>';
       exit();
     }

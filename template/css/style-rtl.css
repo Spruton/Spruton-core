@@ -195,7 +195,7 @@ th{
 }
 
 .chosen-container .chosen-drop{
-  left: 9999px;
+  /*left: 9999px;*/
 }
 
 .align-right{

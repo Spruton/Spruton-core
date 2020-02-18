@@ -6,7 +6,7 @@ if(strlen($app_users_cfg->get('hidden_common_reports'))>0)
   $where_sql = " and r.id not in (" . $app_users_cfg->get('hidden_common_reports') . ")";
 }
 
-$reports_query = db_query("select r.* from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and find_in_set(" . $app_user['group_id'] . ",r.users_groups) and r.in_dashboard=1 and r.reports_type = 'common' " . $where_sql . " order by r.dashboard_sort_order, r.name");
+$reports_query = db_query("select r.* from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and (find_in_set(" . $app_user['group_id'] . ",r.users_groups) or find_in_set(" . $app_user['id'] . ",r.assigned_to) ) and r.in_dashboard=1 and r.reports_type = 'common' " . $where_sql . " order by r.dashboard_sort_order, r.name");
 while($reports = db_fetch_array($reports_query))
 {
   //get report entity info

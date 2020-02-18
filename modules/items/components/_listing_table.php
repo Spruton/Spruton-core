@@ -59,7 +59,9 @@ while($v = db_fetch_array($fields_query))
 	else
 	{
 		$html .= '
-	      <th ' . $listing_order_action . ' ' . $listing_order_css_class . ' data-field-id="' . $v['id'] . '" ' . $listing->get_listing_col_width($v['id']). '><div>' . fields_types::get_option($v['type'],'name',$v['name']) . '</div></th>
+	      <th ' . $listing_order_action . ' ' . $listing_order_css_class . ' data-field-id="' . $v['id'] . '" ' . $listing->get_listing_col_width($v['id']). '>
+	      		<div ' . (strlen($v['short_name']) ? 'title="' . htmlspecialchars($v['long_name']) . '"':'' ) . '>' . fields_types::get_option($v['type'],'name',$v['name']) . '</div>
+	      </th>
 	  ';
 	}
 
@@ -86,7 +88,7 @@ $html .= '
 while($item = db_fetch_array($items_query))
 {
 	$html .= '
-      <tr ' . ($users_notifications->has($item['id']) ? 'class="unread-item-row"':''). '>
+      <tr ' . (($users_notifications->has($item['id']) and $entity_cfg->get('disable_highlight_unread')!=1) ? 'class="unread-item-row"':''). '>
         ';
 
 	//perpare selected checkbox
@@ -174,10 +176,10 @@ while($item = db_fetch_array($items_query))
 			$path = (isset($path_info_in_report['full_path']) ? $path_info_in_report['full_path']  :$current_path . '-' . $item['id']);
 
 			$html .= '
-          <td class="' . $field['type'] . '  field-' . $field['id'] . '-td item_heading_td' . (($entity_cfg['heading_width_based_content']==1 or $entity_cfg['change_col_width_in_listing']==1) ? ' width-auto':'') . '"><a ' . $popup_html . ' class="item_heading_link" href="' . url_for('items/info', 'path=' . $path . '&redirect_to=subentity&gotopage[' . $_POST['reports_id'] . ']=' . $_POST['page']) . '">' . fields_types::output($output_options) . '</a>
+          <td class="' . $field['type'] . '  field-' . $field['id'] . '-td item_heading_td' . (($entity_cfg->get('heading_width_based_content')==1 or $entity_cfg->get('change_col_width_in_listing')==1) ? ' width-auto':'') . '"><a ' . $popup_html . ' class="item_heading_link" href="' . url_for('items/info', 'path=' . $path . '&redirect_to=subentity&gotopage[' . $_POST['reports_id'] . ']=' . $_POST['page']) . '">' . fields_types::output($output_options) . '</a>
       ';
 
-			if($entity_cfg['use_comments']==1 and $user_has_comments_access)
+			if($entity_cfg->get('use_comments')==1 and $user_has_comments_access and $entity_cfg->get('display_last_comment_in_listing',1))
 			{
 				$html .= comments::get_last_comment_info($current_entity_id,$item['id'],$path, $fields_access_schema);
 			}

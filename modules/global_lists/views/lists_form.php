@@ -15,6 +15,13 @@
     </div>			
   </div>  
   
+  <div class="form-group">
+  	<label class="col-md-3 control-label" for="name"><?php echo TEXT_ADMINISTRATOR_NOTE ?></label>
+    <div class="col-md-9">	
+  	  <?php echo textarea_tag('notes',$obj['notes'],array('class'=>'form-control')) ?>
+    </div>			
+  </div> 
+  
     
   </div>
 </div>

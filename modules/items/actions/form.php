@@ -28,6 +28,12 @@ else
     require(component_path('items/items_form_calendar_report_prepare'));
   }
   
+//prepare start/end dates if add item from pivot calendar report
+  if(strstr($app_redirect_to,'pivot_calendars'))
+  {
+  	require(component_path('items/items_form_pivot_calendar_report_prepare'));
+  }  
+  
 //prepare start/end dates if add item from gantt report
   if(strstr($app_redirect_to,'ganttreport'))
   {
@@ -41,4 +47,4 @@ else
   }
 }
 
-$entity_cfg = entities::get_cfg($current_entity_id);
+$entity_cfg = new entities_cfg($current_entity_id);

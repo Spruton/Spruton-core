@@ -15,7 +15,7 @@ class fieldtype_entity_ajax
     
     $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_SELECT_ENTITY,
     		'name'=>'entity_id',
-    		'tooltip'=>TEXT_FIELDTYPE_ENTITY_SELECT_ENTITY_TOOLTIP,
+    		'tooltip_icon'=>TEXT_FIELDTYPE_ENTITY_SELECT_ENTITY_TOOLTIP,
     		'type'=>'dropdown',
     		'choices'=>entities::get_choices(),
     		'params'=>array('class'=>'form-control input-medium','onChange'=>'fields_types_ajax_configuration(\'fields_for_search_box\',this.value)'),    		
@@ -34,6 +34,10 @@ class fieldtype_entity_ajax
     		'choices'=>array('dropdown'=>TEXT_FIELDTYPE_DROPDOWN_TITLE, 'dropdown_multiple'=>TEXT_FIELDTYPE_DROPDOWN_MULTIPLE_TITLE),
     		'default' => 'dropdown',
     		'params'=>array('class'=>'form-control input-xlarge'));
+    
+    $cfg[TEXT_SETTINGS][] = array('title'=>TEXT_DEFAULT_TEXT, 'name'=>'default_text', 'type'=>'input', 'tooltip_icon'=>TEXT_DEFAULT_TEXT_INFO, 'params'=>array('class'=>'form-control input-medium'));
+    
+    $cfg[TEXT_SETTINGS][] = array('title'=> TEXT_DISPLAY_ONLY_ASSIGNED_RECORDS,'tooltip_icon'=>TEXT_DISPLAY_ONLY_ASSIGNED_RECORDS_INFO, 'name'=>'display_assigned_records_only','type'=>'checkbox');
     
     $cfg[TEXT_SETTINGS][] = array('title'=> TEXT_HIDE_PLUS_BUTTON, 'name'=>'hide_plus_button','type'=>'checkbox');
     
@@ -157,8 +161,8 @@ class fieldtype_entity_ajax
     	$parent_entity_item_is_the_same = true;
     }		
     	
-    $button_add_html = '';
-    if($cfg->get('hide_plus_button')!=1 and isset($current_path_array) and $app_action!='account' and $app_action!='processes' and $app_layout!='public_layout.php' and users::has_access_to_entity($cfg->get('entity_id'),'create') and $cfg->get('entity_id')!=1 and !isset($_GET['is_submodal']) and ($entity_info['parent_id']==0 or ($entity_info['parent_id']>0 and $parent_entity_item_is_the_same)))
+    $button_add_html = '';    
+    if($cfg->get('hide_plus_button')!=1 and isset($current_path_array) and $app_action!='account' and $app_action!='comments_form' and $app_action!='processes' and $app_layout!='public_layout.php' and users::has_access_to_entity($cfg->get('entity_id'),'create') and $cfg->get('entity_id')!=1 and !isset($_GET['is_submodal']) and ($entity_info['parent_id']==0 or ($entity_info['parent_id']>0 and $parent_entity_item_is_the_same)))
     {
     	$url_params = 'is_submodal=true&redirect_to=parent_modal&refresh_field=' . $field['id'];
     
@@ -224,13 +228,15 @@ class fieldtype_entity_ajax
     		
 	    	$("#fields_' . $field['id'] . '").select2({		      
 		      width: ' . self::get_select2_width_by_class($cfg->get('width'), (strlen($button_add_html) ? true:false)) . ',		      
-		      ' . (in_array($app_layout,['public_layout.php']) ? '':'dropdownParent: $("#ajax-modal"),') . '
+		      ' . ((in_array($app_layout,['public_layout.php']) or in_array($app_module_path,['users/account'])) ? '':'dropdownParent: $("#ajax-modal"),') . '
 		      "language":{
 		        "noResults" : function () { return "' . addslashes(TEXT_NO_RESULTS_FOUND) . '"; },
 		    		"searching" : function () { return "' . addslashes(TEXT_SEARCHING). '"; },
 		    		"errorLoading" : function () { return "' . addslashes(TEXT_RESULTS_COULD_NOT_BE_LOADED). '"; },
 		    		"loadingMore" : function () { return "' . addslashes(TEXT_LOADING_MORE_RESULTS). '"; }		    				
-		      },		
+		      },
+		    	' . ($cfg->get('display_as')=='dropdown' ? 'allowClear: true,':'') . '
+		    	placeholder: "' . addslashes($cfg->get('default_text')) . '",
 		      ajax: {
         		url: "' . url_for('dashboard/select2_json','action=select_items&form_type=' . $app_module_path . '&entity_id=' . $cfg->get('entity_id') . '&field_id=' . $field['id'] . '&parent_entity_item_id=' . $params['parent_entity_item_id']) . '",
         		dataType: "json",
@@ -339,10 +345,12 @@ class fieldtype_entity_ajax
   {  	  	
     $filters = $options['filters'];
     $sql_query = $options['sql_query'];
+    
+    $prefix = (strlen($options['prefix']) ? $options['prefix'] : 'e');
   	        
   	if(strlen($filters['filters_values'])>0)
     {  
-      $sql_query[] = "(select count(*) from app_entity_" . $options['entities_id'] . "_values as cv where cv.items_id=e.id and cv.fields_id='" . db_input($options['filters']['fields_id'])  . "' and cv.value in (" . $filters['filters_values'] . ")) " . ($filters['filters_condition']=='include' ? '>0': '=0');
+      $sql_query[] = "(select count(*) from app_entity_" . $options['entities_id'] . "_values as cv where cv.items_id=" . $prefix . ".id and cv.fields_id='" . db_input($options['filters']['fields_id'])  . "' and cv.value in (" . $filters['filters_values'] . ")) " . ($filters['filters_condition']=='include' ? '>0': '=0');
     }
     
     return $sql_query;
@@ -379,6 +387,8 @@ class fieldtype_entity_ajax
   
   static function render_heading_template($item,$entity_info,$field_entity_info,$cfg, $get_html = true)
   {
+  	global $app_users_cache;
+  	
   	$html = '';
   	$text = '';
   	

@@ -75,6 +75,9 @@ class reports_counter
 				$is_selected = ($app_current_users_filter[$this->common_filter_reports_id]==$reports['name'] ? true:false);
 			}
 			
+			//Hide counter if there are no records
+			if($reports['dashboard_counter_hide_zero_count']==1 and $reports_details['count']==0) continue;
+			
 			$html .= '
 				<div class="col-md-3 col-sm-4">
 					<div class="stats-overview stat-block stats-default ' . ($is_selected ? 'selected':'') . '" onClick="location.href=\'' . $click_url. '\'">
@@ -263,7 +266,7 @@ class reports_counter
 		
 		//get common reports list
 		$common_reports_list = array();
-		$reports_query = db_query("select r.* from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and find_in_set(" . $app_user['group_id'] . ",r.users_groups) and r.in_dashboard_counter=1 and r.reports_type = 'common' " . $where_sql . " order by r.dashboard_sort_order, r.name");
+		$reports_query = db_query("select r.* from app_reports r, app_entities e, app_entities_access ea  where r.entities_id = e.id and e.id=ea.entities_id and length(ea.access_schema)>0 and ea.access_groups_id='" . db_input($app_user['group_id']) . "' and (find_in_set(" . $app_user['group_id'] . ",r.users_groups) or find_in_set(" . $app_user['id'] . ",r.assigned_to)) and r.in_dashboard_counter=1 and r.reports_type = 'common' " . $where_sql . " order by r.dashboard_sort_order, r.name");
 		while($reports = db_fetch_array($reports_query))
 		{
 			$common_reports_list[] = $reports['id'];

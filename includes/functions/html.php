@@ -259,9 +259,7 @@
   }
   
   function select_button_tag($choices=array(),$value='',$btn_class='btn-default')
-  {
-
-    
+  {    
     $html = '
     <div class="btn-group">
 			<button type="button" class="btn ' . $btn_class . '">' . $value . '</button>
@@ -275,6 +273,57 @@
     '; 
     
     return $html;
-  }  
+  }
+  
+  function select_entities_tag($name,$choices=array(),$value='',$attributes=array())
+  {
+  	$html = select_tag($name,$choices,$value,$attributes);
+  	
+  	$url = url_for('items/select2_entities','action=select_items&entity_id=' . $attributes['entities_id'] . '&path=' . $attributes['entities_id']);
+  	
+  	$field_id = generate_id_from_name($name);
+  	
+  	$html .= '
+  	<script>
+			$(function(){	
+  			
+  			$("#' . $field_id . '").select2({		      
+				    width: "100%",		      
+				    dropdownParent: $("#ajax-modal"),
+				    "language":{
+				      "noResults" : function () { return "'  . addslashes(TEXT_NO_RESULTS_FOUND) . '"; },
+				  		"searching" : function () { return "' . addslashes(TEXT_SEARCHING) . '"; },
+				  		"errorLoading" : function () { return "' . addslashes(TEXT_RESULTS_COULD_NOT_BE_LOADED) . '"; },
+				  		"loadingMore" : function () { return "' . addslashes(TEXT_LOADING_MORE_RESULTS) . '"; }		    				
+				    },		
+				    ajax: {
+				  		url: "' . $url . '",
+				  		dataType: "json",
+				  		data: function (params) {
+					      var query = {
+					        search: params.term,
+					        page: params.page || 1
+					      }
+					
+					      // Query parameters will be ?search=[term]&page=[page]
+					      return query;
+					    },        				        				
+				  	},        				
+						templateResult: function (d) { return $(d.html); },      		        			
+					});
+				
+				  $("#' . $field_id . '").change(function (e) {
+						$("#' . $field_id . '-error").remove();
+					});
+								
+				})
+			</script>
+  			';
+  	
+  	return $html;
+  }
+  
+  
+
   
   

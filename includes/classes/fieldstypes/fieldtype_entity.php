@@ -40,11 +40,15 @@ class fieldtype_entity
                    'tooltip'=>TEXT_ENTER_WIDTH,
                    'params'=>array('class'=>'form-control input-medium'));
     
+    $cfg[] = array('title'=> TEXT_DISPLAY_ONLY_ASSIGNED_RECORDS,'tooltip_icon'=>TEXT_DISPLAY_ONLY_ASSIGNED_RECORDS_INFO, 'name'=>'display_assigned_records_only','type'=>'checkbox');
+    
     $cfg[] = array('title'=> TEXT_HIDE_PLUS_BUTTON, 'name'=>'hide_plus_button','type'=>'checkbox');
                    
     $cfg[] = array('title'=>tooltip_icon(TEXT_DISPLAY_NAME_AS_LINK_INFO) . TEXT_DISPLAY_NAME_AS_LINK, 'name'=>'display_as_link','type'=>'checkbox');
     
     $cfg[] = array('title'=>TEXT_ALLOW_SEARCH, 'name'=>'allow_search','type'=>'checkbox','tooltip_icon'=>TEXT_ALLOW_SEARCH_TIP);
+    
+    $cfg[] = array('title'=>TEXT_HIDE_FIELD_IF_EMPTY, 'name'=>'hide_field_if_empty','type'=>'checkbox','tooltip_icon'=>TEXT_HIDE_FIELD_IF_EMPTY_TIP);
                    
     $cfg[] = array('name'=>'fields_in_popup','type'=>'hidden');                       
     
@@ -115,6 +119,16 @@ class fieldtype_entity
   	elseif($parent_entity_item_id>0 and $entity_info['parent_id']>0 and $entity_info['parent_id']!=$field_entity_info['parent_id'])
   	{
   		$listing_sql_query = $listing_sql_query . self::prepare_parents_sql($parent_entity_item_id,$entity_info['parent_id'],$field_entity_info['parent_id']);
+  	}
+  	
+  	if($cfg->get('display_assigned_records_only')==1)
+  	{
+  		$listing_sql_query = items::add_access_query($cfg->get('entity_id'),$listing_sql_query);
+  	}
+  	else 
+  	{
+  		//add visibility access query
+  		$listing_sql_query .= records_visibility::add_access_query($cfg->get('entity_id'));
   	}
   	
   	$default_reports_query = db_query("select * from app_reports where entities_id='" . db_input($cfg->get('entity_id')). "' and reports_type='entityfield" . $field['id'] . "'");
@@ -205,7 +219,7 @@ class fieldtype_entity
     
     //prepare button add
     $button_add_html = '';
-    if($cfg->get('hide_plus_button')!=1 and isset($current_path_array) and $app_action!='account' and $app_action!='processes' and $app_layout!='public_layout.php' and users::has_access_to_entity($cfg->get('entity_id'),'create') and $cfg->get('entity_id')!=1 and !isset($_GET['is_submodal']) and ($entity_info['parent_id']==0 or ($entity_info['parent_id']>0 and $parent_entity_item_is_the_same)))
+    if($cfg->get('hide_plus_button')!=1 and isset($current_path_array) and $app_action!='account' and $app_action!='comments_form' and $app_action!='processes' and $app_layout!='public_layout.php' and users::has_access_to_entity($cfg->get('entity_id'),'create') and $cfg->get('entity_id')!=1 and !isset($_GET['is_submodal']) and ($entity_info['parent_id']==0 or ($entity_info['parent_id']>0 and $parent_entity_item_is_the_same)))
     {
     	$url_params = 'is_submodal=true&redirect_to=parent_modal&refresh_field=' . $field['id'];
     	 
@@ -232,7 +246,7 @@ class fieldtype_entity
     {    	    	
       $attributes = array('class'=>'form-control chosen-select ' . $cfg->get('width') . ' field_' . $field['id'] . ($field['is_required']==1 ? ' required':''));
                  
-      return '<table><tr><td>' . select_tag('fields[' . $field['id'] . ']',$choices,$value,$attributes)  . '</td><td>' . $button_add_html . '</td></tr></table>';
+      return '<table><tr><td>' . select_tag('fields[' . $field['id'] . ']',$choices,$value,$attributes)  . '</td><td valign="bottom">' . $button_add_html . '</td></tr></table>';
     }
     elseif($cfg->get('display_as')=='checkboxes')
     {
@@ -324,10 +338,12 @@ class fieldtype_entity
   {  	  
     $filters = $options['filters'];
     $sql_query = $options['sql_query'];
+    
+    $prefix = (strlen($options['prefix']) ? $options['prefix'] : 'e');
   
   	if(strlen($filters['filters_values'])>0)
     {  
-      $sql_query[] = "(select count(*) from app_entity_" . $options['entities_id'] . "_values as cv where cv.items_id=e.id and cv.fields_id='" . db_input($options['filters']['fields_id'])  . "' and cv.value in (" . $filters['filters_values'] . ")) " . ($filters['filters_condition']=='include' ? '>0': '=0');
+      $sql_query[] = "(select count(*) from app_entity_" . $options['entities_id'] . "_values as cv where cv.items_id=" . $prefix . ".id and cv.fields_id='" . db_input($options['filters']['fields_id'])  . "' and cv.value in (" . $filters['filters_values'] . ")) " . ($filters['filters_condition']=='include' ? '>0': '=0');
     }
               
     return $sql_query;

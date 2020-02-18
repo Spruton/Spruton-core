@@ -18,7 +18,7 @@ class fieldtype_hours_difference
 		$choices = array();
 		$choices['today'] = '[' . TEXT_CURRENT_DATE .']';
 		$choices['date_added'] = '[' . TEXT_DATE_ADDED .']';
-		$fields_query = db_query("select * from app_fields where type in ('fieldtype_input_date','fieldtype_input_datetime') and entities_id='" . db_input($_POST['entities_id']) . "'");
+		$fields_query = db_query("select * from app_fields where type in ('fieldtype_input_date','fieldtype_input_datetime','fieldtype_dynamic_date') and entities_id='" . db_input($_POST['entities_id']) . "'");
 		while($fields = db_fetch_array($fields_query))
 		{
 			$choices[$fields['id']] = $fields['name'];

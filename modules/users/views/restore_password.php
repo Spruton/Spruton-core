@@ -30,6 +30,8 @@
 	<button type="submit" class="btn btn-info pull-right"><?php echo TEXT_SEND ?></button>
 </div>
 
+</form>
+
 
 <script>
   $(function() { 

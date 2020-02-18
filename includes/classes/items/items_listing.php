@@ -16,7 +16,7 @@ class items_listing
   
   public $reports_info;
   
-  function __construct($reports_id, $entity_cfg=array())
+  function __construct($reports_id, $entity_cfg=false)
   {
     $reports_info = db_find('app_reports',$reports_id);
     
@@ -36,18 +36,25 @@ class items_listing
     $choices = listing_types::get_choices($this->entities_id);    
     $this->listing_type = (isset($choices[$reports_info['listing_type']]) ? $reports_info['listing_type']:'');    
     
-    $this->entity_cfg = $entity_cfg;
+    if(!$entity_cfg)
+    {
+    	$this->entity_cfg = new entities_cfg($reports_info['entities_id']);
+    }
+    else
+    {
+    	$this->entity_cfg = $entity_cfg;
+    }
   }
   
   function get_fields_query()
   {
     if(strlen($this->fields_in_listing)>0)
     {
-      $sql = "select f.*,if(length(f.short_name)>0,f.short_name,f.name) as name  from app_fields f where f.id in (" . $this->fields_in_listing . ") and  f.entities_id='" . db_input($this->entities_id) . "' order by field(f.id," . $this->fields_in_listing . ")";  
+      $sql = "select f.*,if(length(f.short_name)>0,f.short_name,f.name) as name, f.name as long_name  from app_fields f where f.id in (" . $this->fields_in_listing . ") and  f.entities_id='" . db_input($this->entities_id) . "' order by field(f.id," . $this->fields_in_listing . ")";  
     }
     else
     {
-      $sql = "select f.*,if(length(f.short_name)>0,f.short_name,f.name) as name  from app_fields f where f.listing_status=1 and  f.entities_id='" . db_input($this->entities_id) . "' order by f.listing_sort_order, f.name";
+      $sql = "select f.*,if(length(f.short_name)>0,f.short_name,f.name) as name, f.name as long_name  from app_fields f where f.listing_status=1 and  f.entities_id='" . db_input($this->entities_id) . "' order by f.listing_sort_order, f.name";
     }
     
     return $sql;
@@ -80,7 +87,7 @@ class items_listing
   			$choices = [];
   			if(strlen($listing_sections['fields']))
   			{  				
-  				$fields_query = db_query("select *,if(length(short_name)>0,short_name,name) as name from app_fields where id in (" . $listing_sections['fields'] . ") order by field(id," . $listing_sections['fields'] . ")");
+  				$fields_query = db_query("select *,if(length(short_name)>0,short_name,name) as name, name as long_name  from app_fields where id in (" . $listing_sections['fields'] . ") order by field(id," . $listing_sections['fields'] . ")");
   				while($fields = db_fetch_array($fields_query))
   				{
   					$choices[] = $fields;
@@ -108,7 +115,7 @@ class items_listing
   
   function is_resizable()
   {  	    	
-  	return (int)$this->entity_cfg['change_col_width_in_listing'];
+  	return (int)$this->entity_cfg->get('change_col_width_in_listing');
   }
   
   function get_listing_col_width($field_id)

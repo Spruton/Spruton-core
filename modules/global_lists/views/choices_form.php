@@ -4,6 +4,23 @@
 <?php echo form_tag('choices_form', url_for('global_lists/choices','action=save&lists_id=' . $_GET['lists_id'] . (isset($_GET['id']) ? '&id=' . $_GET['id']:'') ),array('class'=>'form-horizontal')) ?>
 <div class="modal-body">
   <div class="form-body">
+  
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#general_info"  data-toggle="tab"><?php echo TEXT_GENERAL_INFO ?></a></li>  
+  <li><a href="#users"  data-toggle="tab"><?php echo TEXT_USERS ?></a></li>  
+  <li><a href="#note"  data-toggle="tab"><?php echo TEXT_NOTE ?></a></li>
+</ul> 
+
+
+<div class="tab-content">
+  <div class="tab-pane fade active in" id="general_info">      
+       
+  <div class="form-group">
+  	<label class="col-md-4 control-label" for="is_active"><?php echo TEXT_IS_ACTIVE ?></label>
+    <div class="col-md-8">	
+  	  <div class="checkbox-list"><label class="checkbox-inline"><?php echo input_checkbox_tag('is_active','1',array('checked'=>$obj['is_active'])) ?></label></div>      
+    </div>			
+  </div>
        
   <div class="form-group">
   	<label class="col-md-4 control-label" for="parent_id"><?php echo tooltip_icon(TEXT_CHOICES_PARENT_INFO) . TEXT_PARENT ?></label>
@@ -44,19 +61,37 @@
   	  <?php echo input_tag('sort_order',$obj['sort_order'],array('class'=>'form-control input-small')) ?>      
     </div>			
   </div>
-  
-  <div class="form-group">
-  	<label class="col-md-4 control-label" for="users"><?php echo tooltip_icon(TEXT_CHOICES_USERS_INFO) . TEXT_USERS_LIST ?></label>
-    <div class="col-md-8">	
-  	  <?php 
-        $attributes = array('class'=>'form-control chosen-select required',
-                          'multiple'=>'multiple',
-                          'data-placeholder'=>TEXT_SELECT_SOME_VALUES); 
-                          
-        echo select_tag('users[]',users::get_choices(),explode(',',$obj['users']),$attributes);
-      ?>      
-    </div>			
+      
   </div>
+  
+  <div class="tab-pane fade" id="users">
+    
+	  <div class="form-group">
+	  	<label class="col-md-4 control-label" for="users"><?php echo tooltip_icon(TEXT_CHOICES_USERS_INFO) . TEXT_USERS_LIST ?></label>
+	    <div class="col-md-8">	
+	  	  <?php 
+	        $attributes = array('class'=>'form-control chosen-select input-xlarge',
+	                          'multiple'=>'multiple',
+	                          'data-placeholder'=>TEXT_SELECT_SOME_VALUES); 
+	                          
+	        echo select_tag('users[]',users::get_choices(),explode(',',$obj['users']),$attributes);
+	        echo tooltip_text(TEXT_GLOBAL_LIST_USER_NOTES);
+	      ?>      
+	    </div>			
+	  </div>
+  
+  </div>
+  
+  <div class="tab-pane fade" id="note">
+	  <div class="form-group">
+	  	<label class="col-md-3 control-label" for="name"><?php echo TEXT_ADMINISTRATOR_NOTE ?></label>
+	    <div class="col-md-9">	
+	  	  <?php echo textarea_tag('notes',$obj['notes'],array('class'=>'form-control')) ?>
+	    </div>			
+	  </div> 
+  </div>
+  
+</div>  
       
    </div>
 </div> 
@@ -67,6 +102,11 @@
 
 <script>
   $(function() { 
-    $('#choices_form').validate();                                                                                                    
+    $('#choices_form').validate({
+    	submitHandler: function(form){
+				app_prepare_modal_action_loading(form)
+				return true;
+			}
+     });                                                                                                    
   });        
 </script>   

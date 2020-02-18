@@ -30,9 +30,16 @@ class fields_choices
         
   }  
   
-  public static function get_tree($fields_id, $parent_id = 0, $tree = array(), $level=0, $display_choices_values='')
+  public static function get_tree($fields_id, $parent_id = 0, $tree = array(), $level=0, $display_choices_values='',$selected_values = '', $check_status = false)
   {  	
-    $choices_query = db_query("select * from app_fields_choices where fields_id = '" . db_input($fields_id). "' and parent_id='" . db_input($parent_id). "' order by sort_order, name");
+  	$where_sql = '';
+  	
+  	if($check_status)
+  	{
+  		$where_sql = " and (is_active=1 " . (strlen($selected_values) ? " or id in (" . $selected_values . ")":'') . ") ";
+  	}
+  	
+    $choices_query = db_query("select * from app_fields_choices where fields_id = '" . db_input($fields_id). "' and parent_id='" . db_input($parent_id). "' {$where_sql} order by sort_order, name");
     
     while($v = db_fetch_array($choices_query))
     {
@@ -43,15 +50,15 @@ class fields_choices
     	
       $tree[] = array_merge($v,array('level'=>$level));
       
-      $tree = fields_choices::get_tree($fields_id,$v['id'],$tree,$level+1,$display_choices_values);
+      $tree = fields_choices::get_tree($fields_id,$v['id'],$tree,$level+1,$display_choices_values,$selected_values,$check_status);
     }
     
     return $tree;
   }
   
-  public static function get_js_level_tree($fields_id,$parent_id = 0,$tree = array(),$level=0,$display_choices_values='')
+  public static function get_js_level_tree($fields_id,$parent_id = 0,$tree = array(),$level=0,$display_choices_values='',$selected_values = '')
   {
-  	$choices_query = db_query("select * from app_fields_choices where fields_id = '" . db_input($fields_id). "' and parent_id='" . db_input($parent_id). "' order by sort_order, name");
+  	$choices_query = db_query("select * from app_fields_choices where fields_id = '" . db_input($fields_id). "' and parent_id='" . db_input($parent_id). "' and (is_active=1 " . (strlen($selected_values) ? " or id in (" . $selected_values . ")":'') . ") order by sort_order, name");
   	  	 
   	while($v = db_fetch_array($choices_query))
   	{  
@@ -66,7 +73,7 @@ class fields_choices
   					$(update_field).append($("<option>", {value: ' . $v['id'] . ',text: "' . addslashes(strip_tags($v['name'])). '"}));';
   		}
   		
-  		$tree = fields_choices::get_js_level_tree($fields_id,$v['id'],$tree,$level+1,$display_choices_values);
+  		$tree = fields_choices::get_js_level_tree($fields_id,$v['id'],$tree,$level+1,$display_choices_values, $selected_values);
   	}
   	  
   	return $tree;
@@ -115,11 +122,11 @@ class fields_choices
     }
   }  
   
-  public static function get_choices($fields_id,$add_empty = true, $empty_text = '',$display_choices_values='')
+  public static function get_choices($fields_id,$add_empty = true, $empty_text = '',$display_choices_values='',$selected_values = '', $check_status = false)
   {
     $choices = array();
     
-    $tree = fields_choices::get_tree($fields_id,0,array(),0,$display_choices_values);
+    $tree = fields_choices::get_tree($fields_id,0,array(),0,$display_choices_values,$selected_values,$check_status);
             
     if(count($tree)>0)
     {

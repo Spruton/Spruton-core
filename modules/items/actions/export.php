@@ -408,7 +408,7 @@ switch($app_module_action)
         
         $objPHPExcel->getProperties()->setCreator($app_user['name'])
 							 ->setLastModifiedBy($app_user['name'])
-							 ->setTitle($filename)
+							 ->setTitle(substr($filename,0,31))
 							 ->setSubject('')
 							 ->setDescription('')
 							 ->setKeywords('')
@@ -430,7 +430,7 @@ switch($app_module_action)
         $objPHPExcel->getActiveSheet()->getStyle($highest_column.'1')->getFont()->setBold(true);
                         
         // Rename worksheet
-        $objPHPExcel->getActiveSheet()->setTitle($filename);
+        $objPHPExcel->getActiveSheet()->setTitle(substr($filename,0,31));
                         
         // Redirect output to a client’s web browser (Excel2007)
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

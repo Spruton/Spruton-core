@@ -87,7 +87,7 @@ class fieldtype_user_photo
       
       $filename = $file['file'];
       
-      if(isset($options['is_export']))
+      if(isset($options['is_print']))
       {
       	return '<img width=120 height=120 src=' . DIR_WS_USERS . $file['file_sha1'] . '>';
       }

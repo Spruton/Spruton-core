@@ -38,6 +38,21 @@
   	  <?php echo select_tag('CFG[LOGIN_PAGE_HIDE_REMEMBER_ME]',$default_selector,CFG_LOGIN_PAGE_HIDE_REMEMBER_ME,array('class'=>'form-control input-small')); ?>
     </div>			
   </div>
+  
+<?php 
+	if(is_ext_installed())
+	{ 
+		$modules = new modules('digital_signature');
+		$choices = $modules->get_active_modules();
+?>  
+  <div class="form-group">
+  	<label class="col-md-3 control-label" for="CFG_LOGIN_DIGITAL_SIGNATURE_MODULE"><?php echo TEXT_DIGITAL_SIGNATURE_LOGIN ?></label>
+    <div class="col-md-9">	
+  	  <?php echo select_tag('CFG[LOGIN_DIGITAL_SIGNATURE_MODULE]',[''=>'']+$choices,CFG_LOGIN_DIGITAL_SIGNATURE_MODULE,array('class'=>'form-control input-large')); ?>
+  	  <?php echo tooltip_text(TEXT_DIGITAL_SIGNATURE_LOGIN_INFO) ?>
+    </div>			
+  </div>
+<?php } ?>  
     
 <?php echo submit_tag(TEXT_BUTTON_SAVE) ?>
 

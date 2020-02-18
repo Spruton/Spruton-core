@@ -34,6 +34,7 @@
  		<th><?php echo input_checkbox_tag('select_all_fields','',array('class'=>'select_all_fields'))?></th> 
     <th><?php echo TEXT_ACTION?></th>
     <th>#</th>    
+    <th><?php echo TEXT_IS_ACTIVE ?></th>
     <th width="100%"><?php echo TEXT_NAME ?></th>            
     <th><?php echo TEXT_IS_DEFAULT ?></th>
     <th><?php echo TEXT_BACKGROUND_COLOR ?></th>        
@@ -55,9 +56,10 @@ foreach($tree as $v):
       echo button_icon_delete(url_for('global_lists/choices_delete','id=' . $v['id'] . '&lists_id=' . $_GET['lists_id'])); 
       echo ' ' . button_icon_edit(url_for('global_lists/choices_form','id=' . $v['id'] . '&lists_id=' . $_GET['lists_id']));
       echo ' ' . button_icon(TEXT_BUTTON_CREATE_SUB_VALUE,'fa fa-plus',url_for('global_lists/choices_form','parent_id=' . $v['id'] . '&lists_id=' . $_GET['lists_id'])); 
-  ?></td>
-  <td><?php echo $v['id'] ?></td>  
-  <td><?php echo str_repeat('&nbsp;-&nbsp;',$v['level']) . $v['name']  ?></td>
+  ?></td>  
+  <td><?php echo $v['id'] ?></td>
+  <td><?php echo render_bool_value($v['is_active']) ?></td>  
+  <td><?php echo str_repeat('&nbsp;-&nbsp;',$v['level']) . $v['name'] . ' ' . tooltip_icon($v['notes'],'right')  ?></td>
   <td><?php echo render_bool_value($v['is_default']) ?></td>
   <td><?php echo render_bg_color_block($v['bg_color']) ?></td>
   <td><?php echo $v['sort_order'] ?></td>      

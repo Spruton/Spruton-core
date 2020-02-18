@@ -9,4 +9,5 @@ if(isset($_GET['id']))
 else
 {
   $obj = db_show_columns('app_global_lists_choices');
+  $obj['is_active'] = 1;
 }

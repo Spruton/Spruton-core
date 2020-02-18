@@ -17,7 +17,7 @@ switch($app_module_action)
 
 if(isset($_POST['users']))
 {
-	$users = (is_array($_POST['users']) ? $_POST['users'] : []);
+	$users = (is_array($_POST['users']) ? $_POST['users'] : (strlen($_POST['users']) ? [$_POST['users']] : []) );
 }
 else
 {

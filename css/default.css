@@ -681,6 +681,10 @@ textarea.editor{
   min-height: 255px;
 }
 
+textarea.full-editor{
+  min-height: 455px;
+}
+
 @media (max-width: 979px) {
   textarea.editor{
     min-height: 120px;
@@ -1560,7 +1564,20 @@ select.gantt-control {
 }
 
 .gantt_tree_icon.gantt_blank{
-	width: 0px;
+	/*width: 0px;*/
+}
+
+.gantt_grid_head_cell{
+	text-align:left;
+	padding-left: 5px;
+}
+
+.gantt_grid_head_start_date, .gantt_grid_head_end_date, .gantt_grid_head_duration {
+	text-align:center;	
+}  
+
+.gantt_grid_head_text{
+	padding-left:30px;
 }
 
 .funnelchart{
@@ -2201,7 +2218,66 @@ th .tooltip{
 		transform-origin:0 0;
 		-webkit-transform-origin:0 0;
 	}
+	
+	.form-group-fieldtype_boolean_checkbox .col-md-9{
+	 	width: 11%;
+	 	float: left;
+	}
+	
+	.form-group-fieldtype_boolean_checkbox .col-md-3{
+	 	width: 89%;
+	 	display:inline-block;
+	 	text-align: left;
+	}
+			
 }
+
+.pvtRowLabel{
+	font-weight: normal;
+}
+
+.CodeMirror {
+    height: auto;
+    border: 1px solid #ddd;
+}
+
+.fc-time-grid .fc-slats td {
+    height: 2em;
+}    
+
+.table-scrollable.item-pivot-tables > .table > thead > tr > th,
+.table-scrollable.item-pivot-tables > .table > tbody > tr > th,
+.table-scrollable.item-pivot-tables > .table > tfoot > tr > th,
+.table-scrollable.item-pivot-tables > .table > thead > tr > td,
+.table-scrollable.item-pivot-tables > .table > tbody > tr > td,
+.table-scrollable.item-pivot-tables > .table > tfoot > tr > td {
+  white-space: normal;
+}
+
+.content.content-signature_login {
+    width: 790px;
+}
+
+@media (max-width: 800px){
+  .content.content-signature_login{
+	width: 100%;		
+  }
+}
+
+.progress{
+	margin-bottom: 0px;
+	background-color: #d4d4d4;
+}
+
+.table .radio{
+	padding-top: 0px;
+}
+
+.table label{
+	margin-bottom: 0px;
+}
+
+
 
 
 

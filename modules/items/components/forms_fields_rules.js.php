@@ -1,5 +1,5 @@
 <?php
-$form_fields_query = db_query("select r.*, f.name, f.id as fields_id, f.type from app_forms_fields_rules r, app_fields f where f.type in ('fieldtype_dropdown','fieldtype_dropdown_multiple','fieldtype_checkboxes','fieldtype_radioboxes','fieldtype_user_accessgroups','fieldtype_grouped_users') and r.fields_id=f.id and r.entities_id='" . $current_entity_id . "'");
+$form_fields_query = db_query("select r.*, f.name, f.id as fields_id, f.type from app_forms_fields_rules r, app_fields f where f.type in ('fieldtype_dropdown','fieldtype_dropdown_multiple','fieldtype_checkboxes','fieldtype_radioboxes','fieldtype_user_accessgroups','fieldtype_grouped_users','fieldtype_boolean_checkbox','fieldtype_boolean') and r.fields_id=f.id and r.entities_id='" . $current_entity_id . "'");
 
 if(db_num_rows($form_fields_query)>0)
 {	
@@ -38,8 +38,8 @@ if(isset($app_items_form_name))
 	foreach($rules_for_fields as $fields_id=>$fields_type)
 	{
 		$html .= '
-			$(".field_' . $fields_id . '").change(function(){
-				app_handle_forms_fields_display_rules(\'' . $container . '\',' . $fields_id . ',\'' . $fields_type . '\',false,false)
+			$(".field_' . $fields_id . '").change(function(){					
+				app_handle_forms_fields_display_rules(\'' . $container . '\',' . $fields_id . ',\'' . $fields_type . '\',false,false)						
 			})	
 			
 			' . (($app_module_path!='items/info' and $app_module_path!='items/comments_form' and $app_module_path!='items/processes') ? 'app_handle_forms_fields_display_rules(\'' . $container . '\',' . $fields_id . ',\'' . $fields_type . '\',false,false)' : '') . '

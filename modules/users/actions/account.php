@@ -1,6 +1,8 @@
 <?php
 $current_entity_id = 1;
 
+$entity_cfg = new entities_cfg($current_entity_id);
+
 $user_query = db_query("select e.* " . fieldtype_formula::prepare_query_select(1, '') . " from app_entity_1 e where e.id='" . db_input($app_logged_users_id) . "' and e.field_5=1");
 $obj = db_fetch_array($user_query);
 

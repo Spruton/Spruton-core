@@ -37,7 +37,23 @@ while($v = db_fetch_array($form_fields_query)):
 <?php  
 	if(strlen($v['choices']))
 	{		
-		if($v['type']=='fieldtype_user_accessgroups')
+		if(in_array($v['type'],['fieldtype_boolean_checkbox','fieldtype_boolean']))
+		{
+			foreach(explode(',',$v['choices']) as $id)
+			{
+				switch($id)
+				{
+					case 1: 
+						echo TEXT_BOOLEAN_TRUE;
+					break;
+					
+					case 2:
+						echo TEXT_BOOLEAN_FALSE;
+						break;
+				}
+			}
+		}
+		elseif($v['type']=='fieldtype_user_accessgroups')
 		{
 			foreach(explode(',',$v['choices']) as $id)
 			{

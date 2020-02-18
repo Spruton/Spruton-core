@@ -30,8 +30,9 @@ echo $html;
 <table class="table table-striped table-bordered table-hover">
 <thead>
   <tr>
-    <th>Action</th>
+    <th><?php echo TEXT_ACTION?></th>
     <th>#</th>    
+    <th><?php echo TEXT_IS_ACTIVE ?></th>
     <th width="100%"><?php echo TEXT_NAME ?></th>            
 
 <?php if($field_info['type']!='fieldtype_autostatus'): ?>    
@@ -71,7 +72,8 @@ if($field_info['type']=='fieldtype_autostatus')
       echo ' ' . button_icon_edit(url_for('entities/fields_choices_form','id=' . $v['id']. '&entities_id=' . $_GET['entities_id']. '&fields_id=' . $_GET['fields_id']));
       echo ' ' . button_icon(TEXT_BUTTON_CREATE_SUB_VALUE,'fa fa-plus',url_for('entities/fields_choices_form','parent_id=' . $v['id']. '&entities_id=' . $_GET['entities_id']. '&fields_id=' . $_GET['fields_id'])); 
   ?></td>
-  <td><?php echo $v['id'] ?></td>  
+  <td><?php echo $v['id'] ?></td> 
+  <td><?php echo render_bool_value($v['is_active']) ?></td> 
   <td><?php echo ($field_info['type']=='fieldtype_autostatus' ? $html : str_repeat('&nbsp;-&nbsp;',$v['level']) . $v['name'])  ?></td>
 
 <?php if($field_info['type']!='fieldtype_autostatus'): ?>  

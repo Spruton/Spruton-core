@@ -1,6 +1,6 @@
 <?php
 
-if(!export_templates::has_users_access($current_entity_id,$_GET['templates_id']))
+if(!export_templates::has_users_access($current_entity_id,_get::int('templates_id')))
 {
   redirect_to('dashboard/access_forbidden');
 }
@@ -11,7 +11,7 @@ switch($app_module_action)
 {
   case 'print':
   
-			$export_template = export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id']);
+			$export_template = $template_info['template_header'] . export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id']) . $template_info['template_footer'];
       
       $html = '
       <html>
@@ -59,7 +59,7 @@ switch($app_module_action)
     break;      
   case 'export':
 
-      $export_template = export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id']);
+      $export_template = $template_info['template_header'] . export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id']) . $template_info['template_footer'];
       
       $html = '
       <html>
@@ -129,7 +129,7 @@ switch($app_module_action)
     
   case 'export_word':
     
-    	$export_template = export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id']);
+    	$export_template = $template_info['template_header'] . export_templates::get_html($current_entity_id, $current_item_id,$_GET['templates_id']) . $template_info['template_footer'];
     
     	$html = '<html>
         <head>

@@ -51,7 +51,7 @@ while($tabs = db_fetch_array($tabs_query))
 {
   $fileds_html = '';
   
-  $fields_query = db_query("select f.*,if(f.type in ('fieldtype_id','fieldtype_date_added','fieldtype_created_by'),-1,f.sort_order) as field_sort_order from app_fields f where  f.type not in ('fieldtype_action' {$exclude_types}) and f.entities_id='" . db_input($current_entity_id) . "' and forms_tabs_id='" . db_input($tabs['id']) . "' order by field_sort_order, f.name");
+  $fields_query = db_query("select f.*,if(f.type in ('fieldtype_id','fieldtype_date_added','fieldtype_created_by'),-1,f.sort_order) as field_sort_order from app_fields f where  f.type not in ('fieldtype_action','fieldtype_section' {$exclude_types}) and f.entities_id='" . db_input($current_entity_id) . "' and forms_tabs_id='" . db_input($tabs['id']) . "' order by field_sort_order, f.name");
   while($v = db_fetch_array($fields_query))
   {      
     //check field access
