@@ -104,6 +104,8 @@ switch($app_module_action)
 			//add visibility access query
 			$listing_sql_query .= records_visibility::add_access_query($cfg->get('entity_id'));
 		}
+		
+		$listing_sql_query .= fieldtype_entity_ajax::mysql_query_where($cfg,$field,$parent_entity_item_id);
 		 
 		$default_reports_query = db_query("select * from app_reports where entities_id='" . db_input($cfg->get('entity_id')). "' and reports_type='entityfield" . $field['id'] . "'");
 		if($default_reports = db_fetch_array($default_reports_query))

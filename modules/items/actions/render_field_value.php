@@ -27,7 +27,22 @@ if($fields = db_fetch_array($fields_query))
 											
 			echo fields_types::render($fields['type'],$fields,$obj,array('parent_entity_item_id'=>$parent_entity_item_id, 'form'=>'item'));
 			
-			echo '<script>appHandleChosen(); app_handle_submodal_open_btn();</script>';
+			echo '
+			    <script>
+			        appHandleChosen(); 
+			        app_handle_submodal_open_btn();			        
+			    </script>';
+			
+			switch($fields['type'])
+			{
+			    case 'fieldtype_entity_ajax':
+			        echo '
+			            <script>
+			                $("#fields_' . $fields['id'] . '_select2_on").load("' . url_for('dashboard/select2_json','action=copy_values&form_type=items/render_field_value&entity_id=' . $cfg->get('entity_id') . '&field_id=' . $fields['id']) . '",{item_id:' . _get::int('item_id') . '})
+			            </script>
+			            ';
+			        break;
+			}
 		break;
 	}
 }

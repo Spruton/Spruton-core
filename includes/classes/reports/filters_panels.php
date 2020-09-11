@@ -160,6 +160,8 @@ class filters_panels
 	
 	function render_fields($panel_field,$panel_info)
 	{	
+	    global $app_module_path;
+	    
 		$field_info_query = db_query("select * from app_fields where id='" . $panel_field['fields_id'] . "'");
 		if(!$field_info = db_fetch_array($field_info_query))
 		{
@@ -169,19 +171,30 @@ class filters_panels
 		$panels_id_str = ($panel_info['is_active_filters']!=1 ? '-' . $panel_info['id']:'');
 		
 		$filters_values = '';
-		$reports_filters_query = db_query("select * from app_reports_filters where fields_id='" . $field_info['id'] . "' and reports_id='" . $this->reports_id . "' and filters_condition!='exclude'");
+		$reports_id = filters_panels::get_report_id_by_field_id($this->reports_id,$field_info['id']);
+				
+		//skip parent filters if parent item selected
+		if($app_module_path=='items/items' and $field_info['entities_id'] != $this->entities_id) return '';
+		
+		$reports_filters_query = db_query("select * from app_reports_filters where fields_id='" . $field_info['id'] . "' and reports_id='" . $reports_id . "' and filters_condition!='exclude'");
 		if($reports_filters = db_fetch_array($reports_filters_query))
 		{
 			$filters_values = $reports_filters['filters_values'];
 		}
-		
-		
-		$field_name = strlen($field_info['short_name']) ? $field_info['short_name'] : fields_types::get_option($field_info['type'],'name',$field_info['name']);		
+				
+		if(strlen($panel_field['title']))
+		{
+		    $field_name = $panel_field['title'];
+		}
+		else
+		{
+		    $field_name = strlen($field_info['short_name']) ? $field_info['short_name'] : fields_types::get_option($field_info['type'],'name',$field_info['name']);
+		}				
 		
 		$html = '				
 				<div class="heading">
 					' . $field_name . ': <a href="javascript:delete_field_fielter_value' . $this->custom_panel_id . '(' . $field_info['id'] . ')" title="' . TEXT_RESET . '"><i class="fa fa-times" aria-hidden="true"></i></a>						
-			  </div>';
+			    </div>';
 					
 		switch($field_info['type'])
 		{		
@@ -204,7 +217,7 @@ class filters_panels
 			case 'fieldtype_date_updated':
 			case 'fieldtype_input_date':
 			case 'fieldtype_input_datetime':
-		  case 'fieldtype_dynamic_date':
+		    case 'fieldtype_dynamic_date':
 				
 				$filters_values = explode(',',$filters_values);
 				//print_r($reports_filters);
@@ -260,7 +273,10 @@ class filters_panels
 				break;
 				
 			case 'fieldtype_user_accessgroups':
-				$choices = access_groups::get_choices(true);
+			    if(!$choices = fieldtype_user_accessgroups::get_choices_by_rules())
+			    {
+			        $choices = access_groups::get_choices(true);
+			    }
 				break;
 				
 			case 'fieldtype_user_status':
@@ -272,6 +288,7 @@ class filters_panels
 				break;
 				
 			case 'fieldtype_users':
+			case 'fieldtype_users_ajax':
 				$choices = fieldtype_users::get_choices($field_info, ['parent_entity_item_id'=>$this->parent_entity_item_id]);
 				break;
 				
@@ -291,7 +308,18 @@ class filters_panels
 					if($k>0) $choices[$k] = $v;
 				}												
 				break;
-				
+			case 'fieldtype_boolean':
+			case 'fieldtype_boolean_checkbox':
+			    $cfg = new fields_types_cfg($field_info['configuration']);
+			    
+			    $choices = array();			    			    
+			    $choices[''] = '';			    			    
+			    $choices['true'] = (strlen($cfg->get('text_boolean_true'))>0 ? $cfg->get('text_boolean_true') : TEXT_BOOLEAN_TRUE);
+			    $choices['false'] = (strlen($cfg->get('text_boolean_true'))>0 ? $cfg->get('text_boolean_false') : TEXT_BOOLEAN_FALSE);
+			    
+			    $panel_field['display_type'] = 'dropdown';
+			    $panel_field['width'] = 'input-small';
+			    break;
 			default: 
 				
 				$input_width = 'input-medium';
@@ -622,5 +650,28 @@ class filters_panels
 		{
 			return false;
 		}
+	}
+	
+	static function get_report_id_by_field_id($reports_id,$fields_id)
+	{
+	    $field_info_query = db_query("select entities_id from app_fields where id='" . $fields_id . "'");
+	    if($field_info = db_fetch_array($field_info_query))
+	    {
+    	    foreach(reports::get_parent_reports($reports_id,[$reports_id]) as $report_id)
+    	    {
+    	        $report_query = db_query("select id, entities_id from app_reports where id='" . $report_id . "'");
+    	        if($report = db_fetch_array($report_query))
+    	        {
+    	            if($field_info['entities_id']==$report['entities_id'])
+    	            {
+    	                $reports_id = $report['id'];
+    	                
+    	                break;
+    	            }
+    	        }
+    	    }
+	    }
+	    
+	    return $reports_id;
 	}
 }

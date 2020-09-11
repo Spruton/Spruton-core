@@ -13,7 +13,7 @@
         die('Setting MYSQLI_OPT_CONNECT_TIMEOUT failed');
     }
     
-    if (!mysqli_options($$link, MYSQLI_INIT_COMMAND, 'SET NAMES utf8')) {
+    if (!mysqli_options($$link, MYSQLI_INIT_COMMAND, 'SET NAMES utf8mb4')) {
         die('Setting MYSQLI_INIT_COMMAND failed');
     }
     

@@ -13,7 +13,7 @@ class fieldtype_js_formula
   {
     $cfg = array();
     
-    $cfg[] = array('title'=>TEXT_FORMULA, 'name'=>'formula','type'=>'textarea','tooltip'=>TEXT_JS_FORMULA_TIP,'params'=>array('class'=>'form-control'));
+    $cfg[] = array('title'=>TEXT_FORMULA . fields::get_available_fields_helper($_POST['entities_id'], 'fields_configuration_formula'), 'name'=>'formula','type'=>'textarea','tooltip'=>TEXT_JS_FORMULA_TIP,'params'=>array('class'=>'form-control'));
     
     $cfg[] = array('title'=>tooltip_icon(TEXT_NUMBER_FORMAT_INFO) . TEXT_NUMBER_FORMAT, 'name'=>'number_format','type'=>'input','params'=>array('class'=>'form-control input-small input-masked','data-mask'=>'9/~/~'), 'default'=>CFG_APP_NUMBER_FORMAT);
     $cfg[] = array('title'=>tooltip_icon(TEXT_CALCULATE_TOTALS_INFO) . TEXT_CALCULATE_TOTALS, 'name'=>'calclulate_totals','type'=>'checkbox');
@@ -34,9 +34,9 @@ class fieldtype_js_formula
     
     $formula = $js_formula = $cfg->get('formula');
     
-    $js_funciton_name = 'form_handle_js_formula_' . $field['id'] . '()';
-    $js_funciton_name_delay = 'setTimeout("' . $js_funciton_name . '",10);';
-    
+    $js_funciton_name = 'form_handle_js_formula_' . $field['id'] . '()'; 
+    $js_funciton_name_delay = 'setTimeout(function (){ ' . $js_funciton_name . '; ' . $this->inlucde_extra_js_fieldtypes($field) . '},10);';
+            
     $html_change_hanlder = '';
     
     //start build funciton
@@ -92,6 +92,9 @@ class fieldtype_js_formula
     					$html .= 'var field_' . $field_id . ' = ($("#fields_' . $field_id. '").val().length>0) ? Number($("#fields_' . $field_id. '").val()):0;' . "\n";    					
     					$html_change_hanlder .= '$("#fields_' . $field_id. '").keyup(function(){ ' . $js_funciton_name_delay . '})'  . "\n";
     					break;
+    				case 'fieldtype_js_formula':
+    				    $html .= 'var field_' . $field_id . ' = ($("#fields_' . $field_id. '").val().length>0) ? Number($("#fields_' . $field_id. '").val()):0;' . "\n";    				    
+    				    break;
     				case 'fieldtype_dropdown_multiple':
     					$html .= 'var field_' . $field_id . ' = $("#fields_' . $field_id. '").val();'  . "\n";
     					$html_change_hanlder .= '$("#fields_' . $field_id. '").change(function(){ ' . $js_funciton_name_delay . '})' . "\n";
@@ -140,7 +143,7 @@ class fieldtype_js_formula
         
     //try calculate js formula to value    
     $html .= '
-    	try{	
+    	try{	                          
     		 value = ' . $js_formula . ';
     		 value_html = value;';
            
@@ -172,7 +175,7 @@ class fieldtype_js_formula
     		catch (err) {
 					alert("' . TEXT_JS_FORMULA_ERROR . ': ' . str_replace(array("\n","\r","\n\r"),'',addslashes($js_formula)). '"+"\n"+err)  				
 				}
-    		 		
+    		 			    			   
     	 }
 							
 			 $(function(){ 				
@@ -242,5 +245,17 @@ class fieldtype_js_formula
   	}
   
   	return $sql_query;
+  }
+  
+  function inlucde_extra_js_fieldtypes($current_field)
+  {
+      $html = '';
+      $fields_query = db_query("select f.id from app_fields f, app_forms_tabs t where f.forms_tabs_id=t.id and f.type='fieldtype_js_formula' and f.id!='" . $current_field['id'] . "' and f.entities_id='" . $current_field['entities_id']. "' order by t.sort_order, t.name, f.sort_order, f.name");
+      while($fields = db_fetch_array($fields_query))
+      {
+          $html .= ' form_handle_js_formula_' . $fields['id'] . '();';
+      }
+      
+      return $html;
   }
 }

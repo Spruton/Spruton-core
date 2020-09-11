@@ -353,9 +353,10 @@ class reports
   			}
   			//handle search by phone
   			elseif($field['type']=='fieldtype_phone')
-  			{
-  				$sql_query[] = "spruton_regex_replace('[^0-9]','',e.field_" . $field['fields_id'] . ") like '%" . db_input(preg_replace('/\D/', '', $filters_values)) . "%'";
-  			}
+        {
+          if(strlen(preg_replace('/\D/', '', $filters_values)))
+          $sql_query[] = "spruton_regex_replace('[^0-9]','',e.field_" . $field['fields_id'] . ") like '%" . db_input(preg_replace('/\D/', '', $filters_values)) . "%'";
+        }
   			//handle search by entity
   			elseif($field['type']=='fieldtype_entity')
   			{

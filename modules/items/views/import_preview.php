@@ -122,7 +122,7 @@ if($current_entity_id==1)
 if(($_POST['import_action']=='update' or $_POST['import_action']=='update_import') and $multilevel_import==0)
 {
 	$choices = array(''=>'');
-	$fields_query = db_query("select f.* from app_fields f where f.type in ('fieldtype_id','fieldtype_input','fieldtype_random_value') and f.entities_id='" . $current_entity_id . "'");		
+	$fields_query = db_query("select f.* from app_fields f where f.type in ('fieldtype_id','fieldtype_input','fieldtype_phone','fieldtype_random_value') and f.entities_id='" . $current_entity_id . "'");		
 	while($fields = db_fetch_array($fields_query))
 	{
 		$choices[$fields['id']] = fields_types::get_option($fields['type'],'name',$fields['name']);

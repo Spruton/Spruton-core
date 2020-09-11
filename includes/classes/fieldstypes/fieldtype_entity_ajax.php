@@ -47,6 +47,8 @@ class fieldtype_entity_ajax
     
     //TEXT_FIELDS
     $cfg[TEXT_FIELDS][] = array('name'=>'fields_for_search_box','type'=>'ajax','html'=>'<script>fields_types_ajax_configuration(\'fields_for_search_box\',$("#fields_configuration_entity_id").val())</script>');
+    
+    $cfg[TEXT_FIELDTYPE_MYSQL_QUERY_WHERE_QUERY][] = array('title'=>TEXT_FIELDTYPE_MYSQL_QUERY_WHERE_QUERY, 'name'=>'mysql_query_where', 'type'=>'textarea', 'tooltip'=>TEXT_FIELDTYPE_ENTITY_MYSQL_QUERY_TIP, 'params'=>array('class'=>'form-control'));
             
                                               
     return $cfg;
@@ -223,7 +225,8 @@ class fieldtype_entity_ajax
                                                          
     $html .= '
     	<script>	
-    		
+    	var current_from_id = $("#fields_' . $field['id'] . '").closest("form").attr("id");
+	
     	$(function(){
     		
 	    	$("#fields_' . $field['id'] . '").select2({		      
@@ -238,12 +241,13 @@ class fieldtype_entity_ajax
 		    	' . ($cfg->get('display_as')=='dropdown' ? 'allowClear: true,':'') . '
 		    	placeholder: "' . addslashes($cfg->get('default_text')) . '",
 		      ajax: {
-        		url: "' . url_for('dashboard/select2_json','action=select_items&form_type=' . $app_module_path . '&entity_id=' . $cfg->get('entity_id') . '&field_id=' . $field['id'] . '&parent_entity_item_id=' . $params['parent_entity_item_id']) . '",
+        		url: "' . url_for('dashboard/select2_json','action=select_items&form_type=' . $app_module_path . '&entity_id=' . $cfg->get('entity_id') . '&field_id=' . $field['id'] . '&parent_entity_item_id=' . $params['parent_entity_item_id']) . '",        		        
         		dataType: "json",
         		data: function (params) {
 				      var query = {
 				        search: params.term,
-				        page: params.page || 1
+				        page: params.page || 1,
+        		        form_data: $("#"+current_from_id).serializeArray(),
 				      }
 				
 				      // Query parameters will be ?search=[term]&page=[page]
@@ -260,7 +264,7 @@ class fieldtype_entity_ajax
         		
     	</script>
     ';
-    
+            
     return  $html;
   }
   
@@ -422,5 +426,58 @@ class fieldtype_entity_ajax
   	}
   	
   	return ['text'=>$text,'html'=>'<div>' . (strlen($html) ? $html : $text) . '</div>'];
+  }
+  
+  static function mysql_query_where($cfg,$field,$parent_entity_item_id)
+  {      
+      global $app_entities_cache, $app_user;
+      
+      if(!strlen($cfg->get('mysql_query_where'))) return '';
+      
+      $mysql_query_where = ' and (' . $cfg->get('mysql_query_where') . ')';
+      
+      if($parent_entity_item_id>0 and $app_entities_cache[$field['entities_id']]['parent_id']>0)
+      {
+          $item_info_query = db_query("select * from app_entity_" . $app_entities_cache[$field['entities_id']]['parent_id'] . " where id=" . $parent_entity_item_id);
+          if($item_info = db_fetch_array($item_info_query))
+          {
+              foreach($item_info as $k=>$v)
+              {
+                  $k = str_replace('field_','',$k);
+                  $mysql_query_where = str_replace('[' . $k . ']',$v,$mysql_query_where);
+              }
+              
+              //check next parent
+              $parent_entity_id = $app_entities_cache[$field['entities_id']]['parent_id'];
+              
+              if($app_entities_cache[$parent_entity_id]['parent_id']>0 and $item_info['parent_item_id']>0)
+              {
+                  $item_info_query = db_query("select * from app_entity_" . $app_entities_cache[$parent_entity_id]['parent_id'] . " where id=" . $item_info['parent_item_id']);
+                  if($item_info = db_fetch_array($item_info_query))
+                  {
+                      foreach($item_info as $k=>$v)
+                      {
+                          $k = str_replace('field_','',$k);
+                          $mysql_query_where = str_replace('[' . $k . ']',$v,$mysql_query_where);
+                      }
+                  }                  
+              }
+          }
+      }
+      
+      $mysql_query_where = str_replace('[current_user_id]',$app_user['id'],$mysql_query_where);
+      $mysql_query_where = str_replace('[TODAY]',get_date_timestamp(date('Y-m-d')),$mysql_query_where);
+      
+      if(isset($_GET['form_data']))
+      {
+          if(is_array($_GET['form_data']))
+          foreach($_GET['form_data'] as $k=>$v)
+          {
+              $key = str_replace(['fields[',']'],'',$v['name']);
+              $mysql_query_where = str_replace('[' . $key . ']',$v['value'],$mysql_query_where);
+          }
+      }
+      
+      return $mysql_query_where;
   }
 }

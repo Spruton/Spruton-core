@@ -34,7 +34,10 @@ if(count($search_fields)>0)
       //handle search by phone
       elseif($field['type']=='fieldtype_phone')
       {
-      	$sql_query[] = "spruton_regex_replace('[^0-9]','',e.field_" . $field['id'] . ") like '%" . db_input(preg_replace('/\D/', '', $_POST['search_keywords'])) . "%'";
+          if(strlen(preg_replace('/\D/', '', $_POST['search_keywords'])))
+          {
+              $sql_query[] = "rukovoditel_regex_replace('[^0-9]','',e.field_" . $field['id'] . ") like '%" . db_input(preg_replace('/\D/', '', $_POST['search_keywords'])) . "%'";
+          }
       }
       //handle search by entity
       elseif($field['type']=='fieldtype_entity')
